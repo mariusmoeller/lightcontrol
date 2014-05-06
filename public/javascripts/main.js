@@ -1,17 +1,17 @@
 function handleOrientation(event) {
 
-	var iosocket = io.connect();
+	var socket = io.connect();
 
-	var z = Math.floor(event.alpha);
-	var x = Math.floor(event.beta);
-	var y = Math.floor(event.gamma);
+	var z = event.alpha;
+	var x = event.beta;
+	var y = event.gamma;
+	
+	var orientation = [x, y, z];
 	
 	document.getElementById("x").innerHTML = x;
 	document.getElementById("y").innerHTML = y;
 	
-	iosocket.emit('data', x + " " + y + " " + z);
-	
-	console.log('orientation handler fires');
+	socket.emit('data', orientation);
 }
 
 window.addEventListener('deviceorientation', handleOrientation);

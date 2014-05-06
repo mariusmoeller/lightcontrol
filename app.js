@@ -9,6 +9,14 @@ var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
 var socketio = require('socket.io');
+var artnet = require('artnet-node/lib/artnet_client');
+
+// print process.argv
+/*process.argv.forEach(function (val, index, array) {
+  console.log(index + ': ' + val);
+});*/
+
+var artnetClient = artnet.createClient(process.argv[3], process.argv[5]);
 
 var app = express();
 
@@ -38,6 +46,15 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 
 socketio.listen(server).on('connection', function(socket) {
 	socket.on('data', function(data) {
+		
+		// round incoming data
+		data.forEach(function(entry, index, array) {
+			array[index] = Math.floor(entry);
+		});
+		
+		// send to artnet server
+		artnetClient.send(data);
+	
 		console.log(data);
 	});
 });
