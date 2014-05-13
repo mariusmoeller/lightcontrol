@@ -18,4 +18,61 @@ html
 
     meta(name='viewport', content='width=device-width, initial-scale=1')
   body
+
+    nav.navbar.navbar-inverse.navbar-fixed-top(role='navigation')
+      .container-fluid
+        // Brand and toggle get grouped for better mobile display
+        .navbar-header
+          button.navbar-toggle(type='button', data-toggle='collapse', data-target='#bs-example-navbar-collapse-1')
+            span.sr-only Toggle navigation
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          a.navbar-brand(href='#') LightControl
+        // Collect the nav links, forms, and other content for toggling
+        #bs-example-navbar-collapse-1.collapse.navbar-collapse
+          ul.nav.navbar-nav
+            li.active
+              a(href='#') Moving Head 1
+            li
+              a(href='#') Moving Head 2
+            li.dropdown
+              a.dropdown-toggle(href='#', data-toggle='dropdown')
+                | Washs
+                b.caret
+              ul.dropdown-menu
+                li
+                  a(href='#') Wash 1
+                li
+                  a(href='#') Wash 2
+                li
+                  a(href='#') Wash 3
+                li.divider
+                li
+                  a(href='#') All Washs
+          //
+              form.navbar-form.navbar-left(role='search')
+                .form-group
+                  input.form-control(type='text', placeholder='Search')
+                button.btn.btn-default(type='submit') Submit
+                li.divider
+          ul.nav.navbar-nav.navbar-right
+            li
+              a(href='#') Programs
+            li.dropdown
+              a.dropdown-toggle(href='#', data-toggle='dropdown')
+                | On / Off
+                b.caret
+              ul.dropdown-menu
+                li
+                  a(href='#') Washs On / Off
+                li
+                  a(href='#') Moving Head On / Off
+                li.divider
+                li
+                  a(href='#') All On / Off
+        // /.navbar-collapse
+      // /.container-fluid
+
+
     block content
