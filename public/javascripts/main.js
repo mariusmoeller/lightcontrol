@@ -34,6 +34,7 @@ window.onload = function() {
 	});
 
 	$('#colors').minicolors();
+	$('#timer').click(function(){timer();});
 }
 
 
