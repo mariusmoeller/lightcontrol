@@ -17,15 +17,23 @@ function handleOrientation(event) {
 
 window.onload = function() {
 	$.minicolors.defaults = $.extend($.minicolors.defaults, {
-		changeDelay: 200,
+		changeDelay: 0,
 		letterCase: 'uppercase',
 		theme: 'wheel',
 		inline: true,
 		control: 'wheel'
 	});
 
-	$('#colors').minicolors();
+	$('#colors').minicolors({
+		change: function(hex, opacity) {
+			var socket = io.connect();
 
+			socket.emit('color', hex);
+			console.log(hex + ' - ' + opacity);
+		}
+	});
+
+	$('#colors').minicolors();
 }
 
 

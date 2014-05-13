@@ -46,15 +46,24 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 
 socketio.listen(server).on('connection', function(socket) {
 	socket.on('data', function(data) {
-		
+
 		// round incoming data
 		data.forEach(function(entry, index, array) {
 			array[index] = Math.floor(entry);
 		});
-		
+
 		// send to artnet server
 		artnetClient.send(data);
-	
-		console.log(data);
+
+		// console.log(data);
 	});
+
+    socket.on('color', function(data) {
+         //convert string to base 16 number
+        var num = parseInt(data.substring(1), 16);
+
+        //return the red, green and blue values as a new array
+
+        console.log([num >> 16, num >> 8 & 255, num & 255]);
+    })
 });
