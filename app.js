@@ -76,7 +76,7 @@ socketio.listen(server).on('connection', function(socket) {
         console.log([num >> 16, num >> 8 & 255, num & 255]);
 
         if (record)
-            show.addData(1, [num >> 16, num >> 8 & 255, num & 255]);
+            show.addData(2, [num >> 16, num >> 8 & 255, num & 255]);
     })
 
     socket.on('record', function(state) {
@@ -85,7 +85,8 @@ socketio.listen(server).on('connection', function(socket) {
             record = state;
         else
             record = state
-            console.log(show.getAll())
+            //console.log(show.getAll())
+            show.save();
             show.deleteAll()
     })
 });

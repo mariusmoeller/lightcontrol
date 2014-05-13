@@ -1,4 +1,5 @@
 // var Show = {};
+var fs = require('fs');
 
 function Show(data) {
     this.data = [];
@@ -18,6 +19,10 @@ Show.prototype.getData = function(id) {
 
 Show.prototype.getAll = function() {
     return this.data;
+}
+
+Show.prototype.save = function() {
+    fs.writeFileSync('./store/show', this.data.join('\n'));
 }
 
 Show.prototype.deleteAll = function() {
