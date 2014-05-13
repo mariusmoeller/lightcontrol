@@ -3,5 +3,5 @@
  */
 
 exports.list = function(req, res){
-  res.render('program', { title: 'LightControl' });
+  res.render('show', { title: 'LightControl' });
 };
