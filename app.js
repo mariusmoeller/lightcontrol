@@ -55,11 +55,11 @@ socketio.listen(server).on('connection', function(socket) {
 		// send to artnet server
 		artnetClient.send(data);
 
-		// console.log(data);
+		console.log(data);
 	});
 
     socket.on('color', function(data) {
-         //convert string to base 16 number
+         //cut off #, then convert string to base 16 number
         var num = parseInt(data.substring(1), 16);
 
         //return the red, green and blue values as a new array
