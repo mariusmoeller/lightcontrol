@@ -57,8 +57,15 @@ html
                 button.btn.btn-default(type='submit') Submit
                 li.divider
           ul.nav.navbar-nav.navbar-right
-            li
-              a(href='/programs') Programs
+            li.dropdown
+              a.dropdown-toggle(href='#', data-toggle='dropdown')
+                | Programs
+                b.caret
+              ul.dropdown-menu
+                li
+                  a(href='/programs') List programs
+                li
+                  a(href='/programs') Record program
             li.dropdown
               a.dropdown-toggle(href='#', data-toggle='dropdown')
                 | On / Off
