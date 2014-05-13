@@ -6,11 +6,12 @@
 var express = require('express');
 var routes = require('./routes');
 var user = require('./routes/user');
-var show = require('./routes/show');
+var showRoute = require('./routes/show');
 var http = require('http');
 var path = require('path');
 var socketio = require('socket.io');
 var artnet = require('artnet-node/lib/artnet_client');
+var Show = require('./Show');
 
 // print process.argv
 /*process.argv.forEach(function (val, index, array) {
@@ -40,11 +41,14 @@ if ('development' == app.get('env')) {
 
 app.get('/', routes.index);
 app.get('/users', user.list);
-app.get('/shows', show.list);
+app.get('/shows', showRoute.list);
 
 var server = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
+
+var record = false;
+var show = Show.createShow();
 
 socketio.listen(server).on('connection', function(socket) {
 	socket.on('data', function(data) {
@@ -57,6 +61,9 @@ socketio.listen(server).on('connection', function(socket) {
 		// send to artnet server
 		artnetClient.send(data);
 
+        if (record)
+            show.addData(1, data);
+
 		console.log(data);
 	});
 
@@ -67,5 +74,18 @@ socketio.listen(server).on('connection', function(socket) {
         //return the red, green and blue values as a new array
 
         console.log([num >> 16, num >> 8 & 255, num & 255]);
+
+        if (record)
+            show.addData(1, [num >> 16, num >> 8 & 255, num & 255]);
+    })
+
+    socket.on('record', function(state) {
+        console.log(state);
+        if (state)
+            record = state;
+        else
+            record = state
+            console.log(show.getAll())
+            show.deleteAll()
     })
 });

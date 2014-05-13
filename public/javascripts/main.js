@@ -43,4 +43,16 @@ window.onload = function() {
 
 		$(this).toggleClass('btn-success');
 	})
+
+	$('#btn-record').click(function() {
+		var socket = io.connect();
+		if ($(this).hasClass('btn-default')) {
+			$(this).addClass('btn-danger');
+			socket.emit('record', true);
+		} else {
+			$(this).removeClass('btn-danger');
+			socket.emit('record', false);
+		}
+		$(this).toggleClass('btn-default');
+	})
 }
