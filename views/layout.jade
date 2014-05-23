@@ -13,8 +13,13 @@ html
     script(src='/lib/minicolors/jquery.minicolors.js')
     link(rel='stylesheet', href='/lib/minicolors/jquery.minicolors.css')
 
+    script(src='/lib/moment.js')
+    script(src='/lib/countdown/jquery.knob.js')
+    script(src='/lib/countdown/jquery.ccountdown.js')
 
     script(src='/javascripts/main.js')
+    script(src='/javascripts/timer.js')
+    script(src='/javascripts/games.js')
 
     meta(name='viewport', content='width=device-width, initial-scale=1')
   body
@@ -59,13 +64,22 @@ html
           ul.nav.navbar-nav.navbar-right
             li.dropdown
               a.dropdown-toggle(href='#', data-toggle='dropdown')
-                | Shows
+                | Games
                 b.caret
               ul.dropdown-menu
                 li
-                  a(href='/shows') List Shows
+                  a(href='#pong').game Pong
                 li
-                  a(href='/shows') Record Show
+                  a(href='#car').game Car Ralley
+                li
+                  a(href='#fish').game Flying Fish
+            li.dropdown
+              a.dropdown-toggle(href='#', data-toggle='dropdown')
+                | Programs
+                b.caret
+              ul.dropdown-menu
+                li
+                  a(href='#')#timer Timer
             li.dropdown
               a.dropdown-toggle(href='#', data-toggle='dropdown')
                 | On / Off
