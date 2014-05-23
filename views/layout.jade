@@ -64,6 +64,15 @@ html
           ul.nav.navbar-nav.navbar-right
             li.dropdown
               a.dropdown-toggle(href='#', data-toggle='dropdown')
+                | Shows
+                b.caret
+              ul.dropdown-menu
+                li
+                  a(href='/shows') List Shows
+                li
+                  a(href='/shows') Record Show
+            li.dropdown
+              a.dropdown-toggle(href='#', data-toggle='dropdown')
                 | Games
                 b.caret
               ul.dropdown-menu
@@ -80,6 +89,7 @@ html
               ul.dropdown-menu
                 li
                   a(href='#')#timer Timer
+                  
             li.dropdown
               a.dropdown-toggle(href='#', data-toggle='dropdown')
                 | On / Off
