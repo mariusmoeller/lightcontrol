@@ -11,7 +11,7 @@ var http = require('http');
 var path = require('path');
 var socketio = require('socket.io');
 var artnet = require('artnet-node/lib/artnet_client');
-var Show = require('./Show');
+var Show = require('./src/Show');
 
 // print process.argv
 /*process.argv.forEach(function (val, index, array) {
