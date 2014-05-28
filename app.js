@@ -68,11 +68,10 @@ socketio.listen(server).on('connection', function(socket) {
 	});
 
     socket.on('color', function(data) {
-         //cut off #, then convert string to base 16 number
+        // cut off #, then convert string to base 16 number
         var num = parseInt(data.substring(1), 16);
 
-        //return the red, green and blue values as a new array
-
+        // return the red, green and blue values as a new array
         console.log([num >> 16, num >> 8 & 255, num & 255]);
 
         if (record)
