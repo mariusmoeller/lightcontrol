@@ -66,9 +66,12 @@ socketio.listen(server).on('connection', function(socket) {
 			array[index] = Math.floor(entry);
 		});
 
+        for (var i = 0; i < 5; i++)
+            data.unshift(0)
+
 		// send to artnet server
 		artnetClient.send(data);
-    debug('movement data send to artnet client');
+    debug('movement data send to artnet client, data: ' + data);
 
         if (record)
             show.addData(1, data);
