@@ -64,13 +64,16 @@ socketio.listen(server).on('connection', function(socket) {
 		// round incoming data
 		data.forEach(function(entry, index, array) {
 			array[index] = Math.floor(entry);
+
 		});
 
-        for (var i = 0; i < 5; i++)
-            data.unshift(0)
+        // for (var i = 0; i < 5; i++)
+            // data.unshift(0)
+        var channelData = [0,0,0,0,data[2], 0, data[0]];
+
 
 		// send to artnet server
-		artnetClient.send(data);
+		artnetClient.send(channelData);
     debug('movement data send to artnet client, data: ' + data);
 
         if (record)
@@ -85,6 +88,8 @@ socketio.listen(server).on('connection', function(socket) {
 
         // return the red, green and blue values as a new array
         console.log([num >> 16, num >> 8 & 255, num & 255]);
+
+        
 
         if (record)
             show.addData(2, [num >> 16, num >> 8 & 255, num & 255]);
