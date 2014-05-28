@@ -12,7 +12,9 @@ var path = require('path');
 var socketio = require('socket.io');
 var artnet = require('artnet-node/lib/artnet_client');
 var Show = require('./src/Show');
+var debug = require('debug')('app');
 
+debug('start up');
 // print process.argv
 /*process.argv.forEach(function (val, index, array) {
   console.log(index + ': ' + val);
@@ -43,15 +45,21 @@ app.get('/', routes.index);
 app.get('/users', user.list);
 app.get('/shows', showRoute.list);
 
+debug('routes set up');
+
 var server = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
+
+debug('server started');
 
 var record = false;
 var show = Show.createShow();
 
 socketio.listen(server).on('connection', function(socket) {
 	socket.on('data', function(data) {
+
+    debug('movement data comes in');
 
 		// round incoming data
 		data.forEach(function(entry, index, array) {
@@ -60,6 +68,7 @@ socketio.listen(server).on('connection', function(socket) {
 
 		// send to artnet server
 		artnetClient.send(data);
+    debug('movement data send to artnet client');
 
         if (record)
             show.addData(1, data);
