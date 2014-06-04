@@ -1,4 +1,4 @@
-function Pong(width, height) {
+function Pong(width, height, players) {
     this.width = width;
     this.height = height;
 
@@ -6,14 +6,10 @@ function Pong(width, height) {
     this.ballY = parseInt(height / 2)
     this.ballSpeed = 10
 
-    this.ballXSpeed = 1;
+    this.ballXSpeed = 3;
     this.ballYSpeed = 1;
 
-    this.playerAx1;
-    this.playerAx2;
-
-    this.playerBx1;
-    this.playerBx2;
+    this.players = players;
 }
 
 Pong.prototype.makeStep = function() {
@@ -22,11 +18,14 @@ Pong.prototype.makeStep = function() {
 
     // Ball hits wall on the side
     if (this.ballX <= 0 || this.ballX >= this.width) {
-        this.ballXSpeed = -this.ballXSpeed;
+        this.ballXSpeed = -this.ballXSpeed + Math.floor(Math.random() * (5 - 5) + 5);
     }
 
+    // Ball reaches end of field
     if (this.ballY <= 0 || this.ballY >= this.height) {
-        this.ballYSpeed = -this.ballYSpeed;
+        // TODO: hit players and reflect or loose
+
+        this.ballYSpeed = -this.ballYSpeed + Math.floor(Math.random() * (5 - 5) + 5);
     }
 }
 
@@ -34,15 +33,8 @@ Pong.prototype.getBallPos = function() {
     return [this.ballX, this.ballY];
 }
 
-Pong.prototype.setPlayerAPosition = function(x1, x2) {
-    this.playerAx1 = x1;
-    this.playerAx2 = x2;
+Pong.prototype.updatePlayers = function(players) {
+    this.players = players;
 }
-
-Pong.prototype.setPlayerBPosition = function(x1, x2) {
-    this.playerBx1 = x1;
-    this.playerBx2 = x2;
-}
-
 
 module.exports = Pong;
