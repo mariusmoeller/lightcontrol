@@ -105,14 +105,69 @@ socketio.listen(server).on('connection', function(socket) {
     })
 
     socket.on('record', function(state) {
-        console.log(state);
+        /*console.log(state);
         if (state)
             record = state;
         else
             record = state
             //console.log(show.getAll())
             show.save();
-            show.deleteAll()
+            show.deleteAll()*/
+        debug("Pong started");
+        var width = 100;
+        var height = 100;
+
+        var Pong = require('./src/Pong');
+
+        var pong = new Pong(100, 100);
+
+        /*var i;
+        artnetClient.send({4: 0, 6: 0});
+
+        var interval = setInterval(function() {
+            artnetClient.send({4: 0, 6: i});
+            i++;
+            if (i < width)
+                clearInterval(interval);
+        }, 100);
+
+        /*for (var i = height; i < height; i++) {
+            artnetClient.send({4: i, 6: width});
+        }
+
+        for (var i = width; i < width; i++) {
+            artnetClient.send({4: 0, 6: i});
+        }
+
+        for (var i = height; i < height; i++) {
+            artnetClient.send({4: i, 6: width});
+        }*/
+
+        setInterval(function() {
+            var xPos = pong.getBallPos()[0];
+            var yPos = pong.getBallPos()[1];
+
+            var movementData = {4: yPos, 6: xPos};
+
+            artnetClient.send(movementData);
+
+
+            pong.makeStep()
+
+        },10);
+        /*for (var i = 0; i < 100; i++) {
+            var xPos = pong.getBallPos()[0];
+            var yPos = pong.getBallPos()[1];
+
+            pong.makeStep()
+
+
+
+            // console.log(pong.getBallPos());
+
+        }*/
+
+
     })
 
     // socket.on('')

@@ -6,7 +6,7 @@ function Pong(width, height, players) {
     this.ballY = parseInt(height / 2)
     this.ballSpeed = 10
 
-    this.ballXSpeed = 1;
+    this.ballXSpeed = 3;
     this.ballYSpeed = 1;
 
     this.players = players;
@@ -18,14 +18,14 @@ Pong.prototype.makeStep = function() {
 
     // Ball hits wall on the side
     if (this.ballX <= 0 || this.ballX >= this.width) {
-        this.ballXSpeed = -this.ballXSpeed;
+        this.ballXSpeed = -this.ballXSpeed + Math.floor(Math.random() * (5 - 5) + 5);
     }
 
     // Ball reaches end of field
     if (this.ballY <= 0 || this.ballY >= this.height) {
         // TODO: hit players and reflect or loose
 
-        this.ballYSpeed = -this.ballYSpeed;
+        this.ballYSpeed = -this.ballYSpeed + Math.floor(Math.random() * (5 - 5) + 5);
     }
 }
 
