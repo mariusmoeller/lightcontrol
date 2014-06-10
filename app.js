@@ -119,6 +119,29 @@ socketio.listen(server).on('connection', function(socket) {
             show.addData(2, [num >> 16, num >> 8 & 255, num & 255]);
     })
 
+    socket.on('startShow', function(show) {
+        debug("Pong started");
+        var width = 100;
+        var height = 100;
+
+        var Pong = require('./src/Pong');
+
+        var pong = new Pong(100, 100);
+
+        setInterval(function() {
+            var xPos = pong.getBallPos()[0];
+            var yPos = pong.getBallPos()[1];
+
+            var movementData = {4: yPos, 6: xPos};
+
+            artnetClient.send(movementData);
+
+
+            pong.makeStep()
+
+        }, 10);
+    })
+
     socket.on('record', function(state) {
         /*console.log(state);
         if (state)
@@ -128,13 +151,7 @@ socketio.listen(server).on('connection', function(socket) {
             //console.log(show.getAll())
             show.save();
             show.deleteAll()*/
-        debug("Pong started");
-        var width = 100;
-        var height = 100;
 
-        var Pong = require('./src/Pong');
-
-        var pong = new Pong(100, 100);
 
         /*var i;
         artnetClient.send({4: 0, 6: 0});
@@ -158,18 +175,7 @@ socketio.listen(server).on('connection', function(socket) {
             artnetClient.send({4: i, 6: width});
         }*/
 
-        setInterval(function() {
-            var xPos = pong.getBallPos()[0];
-            var yPos = pong.getBallPos()[1];
 
-            var movementData = {4: yPos, 6: xPos};
-
-            artnetClient.send(movementData);
-
-
-            pong.makeStep()
-
-        },10);
         /*for (var i = 0; i < 100; i++) {
             var xPos = pong.getBallPos()[0];
             var yPos = pong.getBallPos()[1];
