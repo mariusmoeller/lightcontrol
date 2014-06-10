@@ -16,7 +16,7 @@
  *
  * @author mwichary@google.com (Marcin Wichary)
  */
-
+var lastId = 1000;
 var tester = {
   // If the number exceeds this in any way, we treat the label as active
   // and highlight it.
@@ -28,7 +28,6 @@ var tester = {
   // How â€œdeepâ€ does an analogue button need to be depressed to consider it
   // a button down.
   ANALOGUE_BUTTON_THRESHOLD: .5,
-
   init: function() {
     //tester.updateMode();
     tester.updateGamepads();
@@ -75,11 +74,11 @@ var tester = {
       }
     }
 
-    if (padsConnected) {
+ /*   if (padsConnected) {
       document.querySelector('#no-gamepads-connected').classList.remove('visible');
     } else {
-      document.querySelector('#no-gamepads-connected').classList.add('visible');
-    }
+     //document.querySelector('#no-gamepads-connected').classList.add('visible');
+    }*/
   },
 
   /**
@@ -137,12 +136,17 @@ var tester = {
   },
 
   buttonPressed: function(id) {
-    var orientation = [];
-    switch(id){
-      case 1: orientation = [0,-255,0]; break; //move down
-      case 2: orientation = [255,0,0]; break; //move right
-      case 3: orientation = [-255,0,0]; break; //move left
-      case 4: orientation = [0,255,0]; break; //move up
+    if(id!=lastId){
+      var socket = io.connect();
+      var orientation = [];
+      switch(id){
+        case "1": orientation = "backward"; break; //move down
+        case "2": orientation = "right"; break; //move right
+        case "3": orientation = "left"; break; //move left
+        case "4": orientation = "forward"; break; //move up
+      }
+      socket.emit('move', orientation);
     }
+    lastId = id;
   }
 };

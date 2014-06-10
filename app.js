@@ -16,7 +16,7 @@ var socketio = require('socket.io');
 // var artnet = require('artnet-node/lib/artnet_client');
 var Artnet = require('./src/ArtnetClient');
 var artnetClient = new Artnet(process.argv[3], process.argv[5]);
-
+var movement = require('./src/movement');
 var Show = require('./src/Show');
 var debug = require('debug')('app');
 
@@ -86,6 +86,23 @@ socketio.listen(server).on('connection', function(socket) {
 
 		console.log(data);
 	});
+    socket.on('move', function(step) {
+
+        debug('movement data comes in' + step);
+        var data = movement.move(step);
+
+        var movementData = {4: data[1], 6: data[0]};
+
+        // send to artnet server
+        artnetClient.send(movementData);
+
+        debug('movement data send to artnet client, data: ' + data);
+
+        if (record)
+            show.addData(1, data);
+
+        console.log(data);
+    });
 
     socket.on('color', function(data) {
         // cut off #, then convert string to base 16 number

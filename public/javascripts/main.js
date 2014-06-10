@@ -38,11 +38,6 @@ window.onload = function() {
 
 	$('#timer').click(function(){timer();});
 
-	$('controller').ready(function(){
-		tester.init();
-	  	gamepadSupport.init();
-	})
-
 	$('#btn-send-position').click(function() {
 		if ($('#btn-send-position').hasClass('btn-success'))
 			window.removeEventListener('deviceorientation', handleOrientation);
