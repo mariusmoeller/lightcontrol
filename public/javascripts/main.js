@@ -37,7 +37,6 @@ window.onload = function() {
 	$('#colors').minicolors();
 
 	$('#timer').click(function(){timer();});
-	$('.game').click(function(src){games(src.target.hash);});
 
 	$('#btn-send-position').click(function() {
 		if ($('#btn-send-position').hasClass('btn-success'))
