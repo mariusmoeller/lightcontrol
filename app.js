@@ -9,6 +9,7 @@ var user = require('./routes/user');
 var showRoute = require('./routes/show');
 var pongRoute = require('./routes/pong');
 var carRoute = require('./routes/car');
+var controllerRoute = require('./routes/controller');
 var http = require('http');
 var path = require('path');
 var socketio = require('socket.io');
@@ -53,6 +54,7 @@ app.get('/users', user.list);
 app.get('/shows', showRoute.list);
 app.get('/pong', pongRoute.list);
 app.get('/car', carRoute.list);
+app.get('/controller', controllerRoute.list);
 
 debug('routes set up');
 

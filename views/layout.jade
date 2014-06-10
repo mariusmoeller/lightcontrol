@@ -3,6 +3,7 @@ html
   head
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='/stylesheets/controller.css')
 
     script(src='/lib/jquery-2.1.1.js')
     script(src='/socket.io/socket.io.js')
@@ -19,6 +20,8 @@ html
 
     script(src='/javascripts/main.js')
     script(src='/javascripts/timer.js')
+    script(src='/javascripts/gamepad.js')
+    script(src='/javascripts/tester.js')
 
     meta(name='viewport', content='width=device-width, initial-scale=1')
   body
@@ -88,6 +91,8 @@ html
               ul.dropdown-menu
                 li
                   a(href='#')#timer Timer
+                li
+                  a(href='/controller')#controller Controller
                   
             li.dropdown
               a.dropdown-toggle(href='#', data-toggle='dropdown')
