@@ -88,7 +88,7 @@ washLight.turnOn();
 socketio.listen(server).on('connection', function(socket) {
 	socket.on('movement', function(data) {
 
-        debug('movement data comes in' + data);
+        // debug('movement data comes in' + data);
 
         data = sanitize.movement(data);
         washLight.setPos(data[2], data[0]);
@@ -99,33 +99,36 @@ socketio.listen(server).on('connection', function(socket) {
             show.addData(1, data);
 	});
 
-    var wash = nconf.get('washs:0')
-    var movementDataC = {};
-    movementDataC[wash.pan.channel] = 0;
-    movementDataC[wash.tilt.channel] = 0;
+    // var wash = nconf.get('washs:0')
+    // var movementDataC = {};
+    // movementDataC[wash.pan.channel] = 0;
+    // movementDataC[wash.tilt.channel] = 0;
 
     socket.on('move', function(step) {
-        var wash = nconf.get('washs:0');
+        // var wash = nconf.get('washs:0');
 
-        debug('movement data comes in' + movementDataC);
+        // debug('movement data comes in' + movementDataC);
         var data = movement.move(step);
         if(data.x){
             // movementDataC[wash.pan.channel] += data.x;
-            movementDataC[wash.pan.channel] += 10;
+            // movementDataC[wash.pan.channel] += 10;
+            console.log('data arrived');
+            washLight.move(10, 0);
 
         }else{
-            movementDataC[wash.tilt.channel] += 10;
+            // movementDataC[wash.tilt.channel] += 10;
+            washLight.move(0, 10);
         }
 
         // send to artnet server
-        artnetClient.send(movementDataC);
+        // artnetClient.send(movementDataC);
 
-        debug('movement data send to artnet client, data: ' + movementDataC);
+        // debug('movement data send to artnet client, data: ' + movementDataC);
 
         if (record)
             show.addData(1, data);
 
-        console.log(movementDataC);
+        // console.log(movementDataC);
     });
 
     socket.on('color', function(hexColor) {
@@ -151,13 +154,9 @@ socketio.listen(server).on('connection', function(socket) {
             var xPos = pong.getBallPos()[0] + 100;
             var yPos = pong.getBallPos()[1] + 100;
 
-            var movementData = {4: yPos, 6: xPos};
-
-            artnetClient.send(movementData);
-
+            washLight.setPos(yPos, xPos);
 
             pong.makeStep()
-
         }, 10);
     })
 
@@ -209,6 +208,4 @@ socketio.listen(server).on('connection', function(socket) {
 
 
     })
-
-    // socket.on('')
 });
