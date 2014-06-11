@@ -108,11 +108,11 @@ socketio.listen(server).on('connection', function(socket) {
 
         debug('movement data comes in' + step);
         var data = movement.move(step);
-        var movementData;
+        var movementData = {};
         if(data.x){
-            movementData = {4: data.x};
+            movementData[wash.pan.channel] = data.x;
         }else{
-            movementData = {6: data.y};
+            movementData[wash.tilt.channel] = data.y;
         }
 
         // send to artnet server
