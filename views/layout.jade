@@ -3,6 +3,7 @@ html
   head
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='/stylesheets/controller.css')
 
     script(src='/lib/jquery-2.1.1.js')
     script(src='/socket.io/socket.io.js')
@@ -88,6 +89,8 @@ html
               ul.dropdown-menu
                 li
                   a(href='#')#timer Timer
+                li
+                  a(href='/controller')#controller Controller
                   
             li.dropdown
               a.dropdown-toggle(href='#', data-toggle='dropdown')
@@ -106,3 +109,5 @@ html
 
 
     block content
+
+    block javascript
