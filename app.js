@@ -104,27 +104,34 @@ socketio.listen(server).on('connection', function(socket) {
 
 		console.log(data);
 	});
+
+    var wash = nconf.get('washs:0')
+    var movementDataC = {};
+    movementDataC[wash.pan.channel] = 0;
+    movementDataC[wash.tilt.channel] = 0;
+
     socket.on('move', function(step) {
         var wash = nconf.get('washs:0');
 
-        debug('movement data comes in' + step);
+        debug('movement data comes in' + movementDataC);
         var data = movement.move(step);
-        var movementData = {};
         if(data.x){
-            movementData[wash.pan.channel] = data.x;
+            // movementDataC[wash.pan.channel] += data.x;
+            movementDataC[wash.pan.channel] += 10;
+
         }else{
-            movementData[wash.tilt.channel] = data.y;
+            movementDataC[wash.tilt.channel] += 10;
         }
 
         // send to artnet server
-        artnetClient.send(movementData);
+        artnetClient.send(movementDataC);
 
-        debug('movement data send to artnet client, data: ' + data);
+        debug('movement data send to artnet client, data: ' + movementDataC);
 
         if (record)
             show.addData(1, data);
 
-        console.log(data);
+        console.log(movementDataC);
     });
 
     socket.on('color', function(hexColor) {

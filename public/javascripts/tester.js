@@ -136,7 +136,7 @@ var tester = {
   },
 
   buttonPressed: function(id) {
-    if(id!=lastId){
+    //if(id!=lastId){
       var socket = io.connect();
       var orientation = [];
       switch(id){
@@ -146,7 +146,7 @@ var tester = {
         case "4": orientation = "forward"; break; //move up
       }
       socket.emit('move', orientation);
-    }
+    // }
     lastId = id;
   }
 };
