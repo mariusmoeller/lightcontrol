@@ -133,8 +133,8 @@ socketio.listen(server).on('connection', function(socket) {
         var pong = new Pong(100, 100);
 
         setInterval(function() {
-            var xPos = pong.getBallPos()[0];
-            var yPos = pong.getBallPos()[1];
+            var xPos = pong.getBallPos()[0] + 100;
+            var yPos = pong.getBallPos()[1] + 100;
 
             var movementData = {4: yPos, 6: xPos};
 

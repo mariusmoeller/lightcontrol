@@ -45,7 +45,12 @@ window.onload = function() {
 			window.addEventListener('deviceorientation', handleOrientation);
 
 		$(this).toggleClass('btn-success');
-	})
+	});
+
+	$('#btn-start-game').click(function() {
+		var socket = io.connect();
+		socket.emit('startShow');
+	});
 
 	$('#btn-record').click(function() {
 		var socket = io.connect();
@@ -57,5 +62,5 @@ window.onload = function() {
 			socket.emit('record', false);
 		}
 		$(this).toggleClass('btn-default');
-	})
+	});
 }
