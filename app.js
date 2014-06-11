@@ -9,6 +9,7 @@ var user = require('./routes/user');
 var showRoute = require('./routes/show');
 var pongRoute = require('./routes/pong');
 var carRoute = require('./routes/car');
+var controllerRoute = require('./routes/controller');
 var http = require('http');
 var path = require('path');
 var socketio = require('socket.io');
@@ -31,7 +32,7 @@ nconf.file({ file: './config/config.json' });
 // Load artnet client with ip and port settings from command line
 var Artnet = require('./src/ArtnetClient');
 var artnetClient = new Artnet(process.argv[3], process.argv[5]);
-
+var movement = require('./src/movement');
 var Show = require('./src/Show');
 
 debug('start up');
@@ -65,6 +66,7 @@ app.get('/users', user.list);
 app.get('/shows', showRoute.list);
 app.get('/pong', pongRoute.list);
 app.get('/car', carRoute.list);
+app.get('/controller', controllerRoute.list);
 
 debug('routes set up');
 
@@ -102,6 +104,27 @@ socketio.listen(server).on('connection', function(socket) {
 
 		console.log(data);
 	});
+    socket.on('move', function(step) {
+
+        debug('movement data comes in' + step);
+        var data = movement.move(step);
+        var movementData;
+        if(data.x){
+            movementData = {4: data.x};
+        }else{
+            movementData = {6: data.y};
+        }
+
+        // send to artnet server
+        artnetClient.send(movementData);
+
+        debug('movement data send to artnet client, data: ' + data);
+
+        if (record)
+            show.addData(1, data);
+
+        console.log(data);
+    });
 
     socket.on('color', function(hexColor) {
         var wash = nconf.get('washs:0');
