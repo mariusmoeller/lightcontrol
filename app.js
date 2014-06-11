@@ -114,15 +114,14 @@ socketio.listen(server).on('connection', function(socket) {
         var wash = nconf.get('washs:0');
 
         debug('movement data comes in' + movementDataC);
+
         var data = movement.move(step);
-        if(data.x){
-            // movementDataC[wash.pan.channel] += data.x;
-            movementDataC[wash.pan.channel] += 10;
+        if(data.x  == -1 || data.x == 1){
+            movementDataC[wash.pan.channel] += data.x;
 
         }else{
-            movementDataC[wash.tilt.channel] += 10;
+            movementDataC[wash.tilt.channel] += data.y;
         }
-
         // send to artnet server
         artnetClient.send(movementDataC);
 

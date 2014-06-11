@@ -119,6 +119,18 @@ var tester = {
    * Update a given analogue stick on the screen.
    */
   updateAxis: function(value, gamepadId, labelId, stickId, horizontal) {
+  if(stickId == "stick-2"){
+      if(value == 1 && horizontal){
+        this.buttonPressed("2");
+      }else if(value == -1 && horizontal){
+        this.buttonPressed("3");
+      }else if(value == 1 && !horizontal){
+        this.buttonPressed("1");
+      }else if(value == -1 && !horizontal){
+        this.buttonPressed("4");
+      }
+    }
+
     var gamepadEl = document.querySelector('#gamepad-' + gamepadId);
 
     // Update the stick visually.
