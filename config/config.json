@@ -10,9 +10,16 @@
       "b": {
         "channel": 10
       },
+      "intensity": {
+          "channel": 12
+      },
       "on": {
         "channel": 11,
         "value": 32
+      },
+      "off": {
+        "channel": 11,
+        "value": 0
       },
       "pan": {
         "channel": 4

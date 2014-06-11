@@ -16,6 +16,9 @@ var socketio = require('socket.io');
 var debug = require('debug')('app');
 var sanitize = require('./src/sanitize');
 
+var Light = require('./src/Light');
+var MovingHead = require('./src/MovingHead');
+
 var nconf = require('nconf');
 nconf.file({ file: './config/config.json' });
 
@@ -79,30 +82,21 @@ debug('server started');
 var record = false;
 var show = Show.createShow();
 
+var washLight = new MovingHead(nconf.get('washs:0'), artnetClient);
+washLight.turnOn();
+
 socketio.listen(server).on('connection', function(socket) {
 	socket.on('movement', function(data) {
-        var wash = nconf.get('washs:0');
 
-        // console.log(wash);
         debug('movement data comes in' + data);
 
         data = sanitize.movement(data);
-
-        var movementData = {};
-        movementData[wash.pan.channel] = data[2];
-        movementData[wash.tilt.channel] = data[0];
-
-        console.log(wash);
-
-    	// send to artnet server
-    	artnetClient.send(movementData);
+        washLight.setPos(data[2], data[0]);
 
         debug('movement data send to artnet client, data: ' + data);
 
         if (record)
             show.addData(1, data);
-
-		console.log(data);
 	});
 
     var wash = nconf.get('washs:0')
@@ -135,24 +129,14 @@ socketio.listen(server).on('connection', function(socket) {
     });
 
     socket.on('color', function(hexColor) {
-        var wash = nconf.get('washs:0');
-
         // cut off #, then convert string to base 16 number
         var num = parseInt(hexColor.substring(1), 16);
 
-        var channelData = {};
-        channelData[wash.r.channel] = num >> 16;
-        channelData[wash.g.channel] = num >> 8 & 255;
-        channelData[wash.b.channel] = num & 255;
-        channelData[wash.on.channel] = wash.on.value;
-        channelData[12] = 255;
-
-        // send to artnet server
-        artnetClient.send(channelData);
+        washLight.setColor([num >> 16, num >> 8 & 255, num & 255])
 
         if (record)
             show.addData(2, [num >> 16, num >> 8 & 255, num & 255]);
-    })
+    });
 
     socket.on('startShow', function(show) {
         debug("Pong started");
