@@ -17,12 +17,7 @@ var debug = require('debug')('app');
 var sanitize = require('./src/sanitize');
 var _ = require('lodash-node');
 
-
-var Light = require('./src/Light');
-var MovingHead = require('./src/MovingHead');
-
-// Set up command line arguments
-var nconf = require('nconf');
+// Set up configuration and command line arguments
 var nconf = require('nconf');
 nconf.argv({
         "a": {
@@ -35,14 +30,7 @@ nconf.argv({
         }
     }).file({ file: './config/config.json' });
 
-// Load artnet client with ip and port settings from command line
-var Artnet = require('./src/ArtnetClient');
-var artnetClient = new Artnet(nconf.get('address'), nconf.get('port'));
-var movement = require('./src/movement');
-var Show = require('./src/Show');
-
-debug('start up');
-
+// Set up express
 var app = express();
 
 // all environments
@@ -69,26 +57,35 @@ app.get('/pong', pongRoute.list);
 app.get('/car', carRoute.list);
 app.get('/controller', controllerRoute.list);
 
-debug('routes set up');
-
 var server = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
 
-debug('server started');
+// Load artnet client
+var Artnet = require('./src/ArtnetClient');
+var artnetClient = new Artnet(nconf.get('address'), nconf.get('port'));
 
-var record = false;
-var show = Show.createShow();
+// Set up lights
+var Light = require('./src/Light');
+var MovingHead = require('./src/MovingHead');
 
 var washs = nconf.get('washs');
 _(washs).forEach(function(wash, i) {
     washs[i] = new MovingHead(wash, artnetClient);
 });
 
+// Misc
+var movement = require('./src/movement');
+var Show = require('./src/Show');
 
+var record = false;
+var show = Show.createShow();
+
+// TODO: remove legacy light
 var washLight = new MovingHead(nconf.get('washs:0'), artnetClient);
 washLight.turnOn();
 
+// Listen to socketio connections
 socketio.listen(server).on('connection', function(socket) {
 	socket.on('movement', function(data, lightID) {
 
@@ -117,6 +114,8 @@ socketio.listen(server).on('connection', function(socket) {
     });
 
     socket.on('color', function(hexColor, lightID) {
+        debug('Recieved color data: ' + hexColor);
+
         // Cut off #, then convert string to base 16 number
         var num = parseInt(hexColor.substring(1), 16);
 
