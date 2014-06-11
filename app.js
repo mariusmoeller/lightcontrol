@@ -105,6 +105,7 @@ socketio.listen(server).on('connection', function(socket) {
 		console.log(data);
 	});
     socket.on('move', function(step) {
+        var wash = nconf.get('washs:0');
 
         debug('movement data comes in' + step);
         var data = movement.move(step);
