@@ -19,31 +19,27 @@ var sanitize = require('./src/sanitize');
 var Light = require('./src/Light');
 var MovingHead = require('./src/MovingHead');
 
+// Set up command line arguments
 var nconf = require('nconf');
-nconf.file({ file: './config/config.json' });
-
-// nconf.set('washs:0:r:channel', 8);
-// nconf.set('washs:0:g:channel', 9);
-// nconf.set('washs:0:b:channel', 10);
-// nconf.set('washs:0:on:channel', 11);
-// nconf.set('washs:0:on:value', 32);
-// nconf.set('washs:0:pan:channel', 4);
-// nconf.set('washs:0:tilt:channel', 6);
-// nconf.save();
-
+var nconf = require('nconf');
+nconf.argv({
+        "a": {
+            alias: 'address',
+            describe: 'The IP Address of the artnet server'
+        },
+        "p": {
+            alias: 'port',
+            descirbe: 'Port of artnet server'
+        }
+    }).file({ file: './config/config.json' });
 
 // Load artnet client with ip and port settings from command line
 var Artnet = require('./src/ArtnetClient');
-var artnetClient = new Artnet(process.argv[3], process.argv[5]);
+var artnetClient = new Artnet(nconf.get('address'), nconf.get('port'));
 var movement = require('./src/movement');
 var Show = require('./src/Show');
 
 debug('start up');
-
-// print process.argv
-/*process.argv.forEach(function (val, index, array) {
-  console.log(index + ': ' + val);
-});*/
 
 var app = express();
 
@@ -88,8 +84,6 @@ washLight.turnOn();
 socketio.listen(server).on('connection', function(socket) {
 	socket.on('movement', function(data) {
 
-        // debug('movement data comes in' + data);
-
         data = sanitize.movement(data);
         washLight.setPos(data[2], data[0]);
 
@@ -101,9 +95,7 @@ socketio.listen(server).on('connection', function(socket) {
 
     socket.on('move', function(step) {
 
-        // debug('movement data comes in' + movementDataC);
         // var data = movement.move(step);
-
         switch(step){
                                    // y, x
             case "forward":  washLight.move(0, 5);break;
@@ -112,15 +104,12 @@ socketio.listen(server).on('connection', function(socket) {
             case "right":    washLight.move(3, 0);break;
         }
 
-
         if (record)
             show.addData(1, data);
-
-        // console.log(movementDataC);
     });
 
     socket.on('color', function(hexColor) {
-        // cut off #, then convert string to base 16 number
+        // Cut off #, then convert string to base 16 number
         var num = parseInt(hexColor.substring(1), 16);
 
         washLight.setColor([num >> 16, num >> 8 & 255, num & 255])
