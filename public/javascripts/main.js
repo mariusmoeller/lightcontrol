@@ -12,7 +12,7 @@ function handleOrientation(event) {
 	// document.getElementById("x").innerHTML = x;
 	// document.getElementById("y").innerHTML = y;
 
-	socket.emit('data', orientation);
+	socket.emit('movement', orientation);
 }
 
 

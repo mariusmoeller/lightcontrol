@@ -1,0 +1,25 @@
+{
+  "washs": {
+    "0": {
+      "r": {
+        "channel": 8
+      },
+      "g": {
+        "channel": 9
+      },
+      "b": {
+        "channel": 10
+      },
+      "on": {
+        "channel": 11,
+        "value": 32
+      },
+      "pan": {
+        "channel": 4
+      },
+      "tilt": {
+        "channel": 6
+      }
+    }
+  }
+}

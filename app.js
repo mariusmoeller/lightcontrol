@@ -12,22 +12,34 @@ var carRoute = require('./routes/car');
 var http = require('http');
 var path = require('path');
 var socketio = require('socket.io');
-// var artnet = require('artnet-node/lib/artnet_client');
+var debug = require('debug')('app');
+var sanitize = require('./src/sanitize');
+
+var nconf = require('nconf');
+nconf.file({ file: './config/config.json' });
+
+// nconf.set('washs:0:r:channel', 8);
+// nconf.set('washs:0:g:channel', 9);
+// nconf.set('washs:0:b:channel', 10);
+// nconf.set('washs:0:on:channel', 11);
+// nconf.set('washs:0:on:value', 32);
+// nconf.set('washs:0:pan:channel', 4);
+// nconf.set('washs:0:tilt:channel', 6);
+// nconf.save();
+
+
+// Load artnet client with ip and port settings from command line
 var Artnet = require('./src/ArtnetClient');
 var artnetClient = new Artnet(process.argv[3], process.argv[5]);
 
 var Show = require('./src/Show');
-var debug = require('debug')('app');
-
-var sanitize = require('./src/sanitize');
 
 debug('start up');
+
 // print process.argv
 /*process.argv.forEach(function (val, index, array) {
   console.log(index + ': ' + val);
 });*/
-
-// var artnetClient = artnet.createClient(process.argv[3], process.argv[5]);
 
 var app = express();
 
@@ -66,13 +78,19 @@ var record = false;
 var show = Show.createShow();
 
 socketio.listen(server).on('connection', function(socket) {
-	socket.on('data', function(data) {
+	socket.on('movement', function(data) {
+        var wash = nconf.get('washs:0');
 
+        // console.log(wash);
         debug('movement data comes in' + data);
 
         data = sanitize.movement(data);
 
-        var movementData = {4: data[2], 6: data[0]};
+        var movementData = {};
+        movementData[wash.pan.channel] = data[2];
+        movementData[wash.tilt.channel] = data[0];
+
+        console.log(wash);
 
     	// send to artnet server
     	artnetClient.send(movementData);
@@ -85,21 +103,18 @@ socketio.listen(server).on('connection', function(socket) {
 		console.log(data);
 	});
 
-    socket.on('color', function(data) {
-        // cut off #, then convert string to base 16 number
-        var num = parseInt(data.substring(1), 16);
+    socket.on('color', function(hexColor) {
+        var wash = nconf.get('washs:0');
 
-        // return the red, green and blue values as a new array
-        // console.log([num >> 16, num >> 8 & 255, num & 255]);
+        // cut off #, then convert string to base 16 number
+        var num = parseInt(hexColor.substring(1), 16);
 
         var channelData = {};
-        // var channelData = {NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,num >> 16,num >> 8 & 255, num & 255,32,255};
-        channelData[8] = num >> 16;
-        channelData[9] = num >> 8 & 255;
-        channelData[10] = num & 255;
-        channelData[11] = 32;
+        channelData[wash.r.channel] = num >> 16;
+        channelData[wash.g.channel] = num >> 8 & 255;
+        channelData[wash.b.channel] = num & 255;
+        channelData[wash.on.channel] = wash.on.value;
         channelData[12] = 255;
-        console.log(channelData);
 
         // send to artnet server
         artnetClient.send(channelData);
