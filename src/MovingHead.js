@@ -34,7 +34,7 @@ MovingHead.prototype.move = function(x, z) {
 
     var data = {};
     data[this.conf.pan.channel] = this.x;
-    data[this.conf.tilt.channel] = this.y;
+    data[this.conf.tilt.channel] = this.z;
 
     this.artnet.send(data);
 }

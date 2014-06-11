@@ -99,31 +99,19 @@ socketio.listen(server).on('connection', function(socket) {
             show.addData(1, data);
 	});
 
-    // var wash = nconf.get('washs:0')
-    // var movementDataC = {};
-    // movementDataC[wash.pan.channel] = 0;
-    // movementDataC[wash.tilt.channel] = 0;
-
     socket.on('move', function(step) {
-        // var wash = nconf.get('washs:0');
 
         // debug('movement data comes in' + movementDataC);
-        var data = movement.move(step);
-        if(data.x){
-            // movementDataC[wash.pan.channel] += data.x;
-            // movementDataC[wash.pan.channel] += 10;
-            console.log('data arrived');
-            washLight.move(10, 0);
+        // var data = movement.move(step);
 
-        }else{
-            // movementDataC[wash.tilt.channel] += 10;
-            washLight.move(0, 10);
+        switch(step){
+                                   // y, x
+            case "forward":  washLight.move(0, 5);break;
+            case "backward": washLight.move(0, -5);break;
+            case "left":     washLight.move(-3, 0);break;
+            case "right":    washLight.move(3, 0);break;
         }
 
-        // send to artnet server
-        // artnetClient.send(movementDataC);
-
-        // debug('movement data send to artnet client, data: ' + movementDataC);
 
         if (record)
             show.addData(1, data);
