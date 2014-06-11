@@ -17,6 +17,7 @@
  * @author mwichary@google.com (Marcin Wichary)
  */
 var lastId = 1000;
+var nextStep = {x:null, y:null};
 var tester = {
   // If the number exceeds this in any way, we treat the label as active
   // and highlight it.
@@ -120,15 +121,7 @@ var tester = {
    */
   updateAxis: function(value, gamepadId, labelId, stickId, horizontal) {
   if(stickId == "stick-2"){
-      if(value == 1 && horizontal){
-        this.buttonPressed("2");
-      }else if(value == -1 && horizontal){
-        this.buttonPressed("3");
-      }else if(value == 1 && !horizontal){
-        this.buttonPressed("1");
-      }else if(value == -1 && !horizontal){
-        this.buttonPressed("4");
-      }
+      this.sendPos(value, horizontal);
     }
 
     var gamepadEl = document.querySelector('#gamepad-' + gamepadId);
@@ -160,5 +153,79 @@ var tester = {
       socket.emit('move', orientation);
     // }
     lastId = id;
+  },
+
+  sendPos: function(value, horizontal){
+    if(horizontal){
+      //x
+      nextStep.x = value;
+    }else{
+      //y
+      nextStep.y = value;
+    }
+
+    if(nextStep.x && nextStep.y){
+      this.move(nextStep);
+      nextStep = {x:null, y:null};
+    }
+
+
+    
+  },
+
+  move: function(step){
+    var x = step.x;
+    var y = step.y;
+    if(x > 0){
+      if(y>0){
+        if(y>0.5){
+          //move right
+          this.buttonPressed("2");
+        }else{
+          //move down
+          this.buttonPressed("1");
+        }
+      }else{
+        if(y>-0.5){
+          //move right
+          this.buttonPressed("2");
+        }else{
+          //move up
+          this.buttonPressed("4");
+        }
+      }
+    }else{
+      if(y>0){
+        if(y>0.5){
+          //move down
+          this.buttonPressed("1");
+        }else{
+          //move left
+          this.buttonPressed("3");
+        }
+      }else{
+        if(y>-0.5){
+          //move left
+          this.buttonPressed("3");
+        }else{
+          //move up
+          this.buttonPressed("4");
+
+        }
+      }
+    }
+
+
+/*
+
+    if(value == 1 && horizontal){
+        this.buttonPressed("2");
+      }else if(value == -1 && horizontal){
+        this.buttonPressed("3");
+      }else if(value == 1 && !horizontal){
+        this.buttonPressed("1");
+      }else if(value == -1 && !horizontal){
+        this.buttonPressed("4");
+      }*/
   }
 };
