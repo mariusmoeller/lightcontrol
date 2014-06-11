@@ -12,7 +12,8 @@ function handleOrientation(event) {
 	// document.getElementById("x").innerHTML = x;
 	// document.getElementById("y").innerHTML = y;
 
-	socket.emit('movement', orientation);
+	// TODO: send proper light id
+	socket.emit('movement', orientation, 0);
 }
 
 
@@ -29,7 +30,8 @@ window.onload = function() {
 		change: function(hex, opacity) {
 			var socket = io.connect();
 
-			socket.emit('color', hex);
+			// TODO: send proper light id
+			socket.emit('color', hex, 0);
 			// console.log(hex + ' - ' + opacity);
 		}
 	});

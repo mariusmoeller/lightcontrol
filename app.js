@@ -15,6 +15,8 @@ var path = require('path');
 var socketio = require('socket.io');
 var debug = require('debug')('app');
 var sanitize = require('./src/sanitize');
+var _ = require('lodash-node');
+
 
 var Light = require('./src/Light');
 var MovingHead = require('./src/MovingHead');
@@ -78,14 +80,20 @@ debug('server started');
 var record = false;
 var show = Show.createShow();
 
+var washs = nconf.get('washs');
+_(washs).forEach(function(wash, i) {
+    washs[i] = new MovingHead(wash, artnetClient);
+});
+
+
 var washLight = new MovingHead(nconf.get('washs:0'), artnetClient);
 washLight.turnOn();
 
 socketio.listen(server).on('connection', function(socket) {
-	socket.on('movement', function(data) {
+	socket.on('movement', function(data, lightID) {
 
         data = sanitize.movement(data);
-        washLight.setPos(data[2], data[0]);
+        washs[lightID].setPos(data[2], data[0]);
 
         debug('movement data send to artnet client, data: ' + data);
 
@@ -108,11 +116,11 @@ socketio.listen(server).on('connection', function(socket) {
             show.addData(1, data);
     });
 
-    socket.on('color', function(hexColor) {
+    socket.on('color', function(hexColor, lightID) {
         // Cut off #, then convert string to base 16 number
         var num = parseInt(hexColor.substring(1), 16);
 
-        washLight.setColor([num >> 16, num >> 8 & 255, num & 255])
+        washs[lightID].setColor([num >> 16, num >> 8 & 255, num & 255])
 
         if (record)
             show.addData(2, [num >> 16, num >> 8 & 255, num & 255]);
@@ -138,51 +146,15 @@ socketio.listen(server).on('connection', function(socket) {
     })
 
     socket.on('record', function(state) {
-        /*console.log(state);
-        if (state)
+        console.log(state);
+
+        if (state) {
             record = state;
-        else
+        } else {
             record = state
             //console.log(show.getAll())
             show.save();
-            show.deleteAll()*/
-
-
-        /*var i;
-        artnetClient.send({4: 0, 6: 0});
-
-        var interval = setInterval(function() {
-            artnetClient.send({4: 0, 6: i});
-            i++;
-            if (i < width)
-                clearInterval(interval);
-        }, 100);
-
-        /*for (var i = height; i < height; i++) {
-            artnetClient.send({4: i, 6: width});
+            show.deleteAll()
         }
-
-        for (var i = width; i < width; i++) {
-            artnetClient.send({4: 0, 6: i});
-        }
-
-        for (var i = height; i < height; i++) {
-            artnetClient.send({4: i, 6: width});
-        }*/
-
-
-        /*for (var i = 0; i < 100; i++) {
-            var xPos = pong.getBallPos()[0];
-            var yPos = pong.getBallPos()[1];
-
-            pong.makeStep()
-
-
-
-            // console.log(pong.getBallPos());
-
-        }*/
-
-
     })
 });
