@@ -18,6 +18,7 @@
  */
 var lastId = 1000;
 var nextStep = {x:null, y:null};
+var socket = io.connect();
 var tester = {
   // If the number exceeds this in any way, we treat the label as active
   // and highlight it.
@@ -141,18 +142,14 @@ var tester = {
   },
 
   buttonPressed: function(id) {
-    //if(id!=lastId){
-      var socket = io.connect();
-      var orientation = [];
-      switch(id){
-        case "1": orientation = "backward"; break; //move down
-        case "2": orientation = "right"; break; //move right
-        case "3": orientation = "left"; break; //move left
-        case "4": orientation = "forward"; break; //move up
-      }
-      socket.emit('move', orientation);
-    // }
-    lastId = id;
+    var orientation = [];
+    switch(id){
+      case "1": orientation = "backward"; break; //move down
+      case "2": orientation = "right"; break; //move right
+      case "3": orientation = "left"; break; //move left
+      case "4": orientation = "forward"; break; //move up
+    }
+    socket.emit('move', orientation);
   },
 
   sendPos: function(value, horizontal){
@@ -168,64 +165,41 @@ var tester = {
       this.move(nextStep);
       nextStep = {x:null, y:null};
     }
-
-
-    
   },
 
   move: function(step){
     var x = step.x;
     var y = step.y;
+    var orientation;
     if(x > 0){
       if(y>0){
-        if(y>0.5){
-          //move right
-          this.buttonPressed("2");
+        if(x>y){
+          orientation = "right";
         }else{
-          //move down
-          this.buttonPressed("1");
+          orientation = "backward";
         }
       }else{
-        if(y>-0.5){
-          //move right
-          this.buttonPressed("2");
+        if(x>y){
+          orientation = "right";
         }else{
-          //move up
-          this.buttonPressed("4");
+          orientation = "forward";
         }
       }
     }else{
       if(y>0){
-        if(y>0.5){
-          //move down
-          this.buttonPressed("1");
+        if(y>x){
+          orientation = "backward";
         }else{
-          //move left
-          this.buttonPressed("3");
+          orientation = "left";
         }
       }else{
-        if(y>-0.5){
-          //move left
-          this.buttonPressed("3");
+        if(y>x){
+          orientation = "left";
         }else{
-          //move up
-          this.buttonPressed("4");
-
+          orientation = "forward";
         }
       }
     }
-
-
-/*
-
-    if(value == 1 && horizontal){
-        this.buttonPressed("2");
-      }else if(value == -1 && horizontal){
-        this.buttonPressed("3");
-      }else if(value == 1 && !horizontal){
-        this.buttonPressed("1");
-      }else if(value == -1 && !horizontal){
-        this.buttonPressed("4");
-      }*/
+    socket.emit('move', orientation);
   }
 };
