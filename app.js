@@ -9,6 +9,7 @@ var user = require('./routes/user');
 var showRoute = require('./routes/show');
 var pongRoute = require('./routes/pong');
 var carRoute = require('./routes/car');
+var timerRoute = require('./routes/timer');
 var controllerRoute = require('./routes/controller');
 var http = require('http');
 var path = require('path');
@@ -56,6 +57,7 @@ app.get('/shows', showRoute.list);
 app.get('/pong', pongRoute.list);
 app.get('/car', carRoute.list);
 app.get('/controller', controllerRoute.list);
+app.get('/timer', timerRoute.list);
 
 var server = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

@@ -1,16 +1,5 @@
 function timer() {
-    if($('.ccounter').length == 0){
-        var div = '<div class="ccounter">' 
-        + '<input class="knob hour" data-readOnly="false" data-width="150" data-min="0" data-max="24" data-displayPrevious=true data-fgColor="#66EE66" data-skin="tron" data-thickness=".2" value="75">' 
-        + '<input class="knob minute" data-readOnly="false" data-width="150" data-min="0" data-max="60" data-displayPrevious=true data-fgColor="#ffec03" data-skin="tron" data-thickness=".2" value="75">' 
-        + '<input class="knob second" data-readOnly="false" data-width="150" data-min="0" data-max="60" data-displayPrevious=true data-fgColor="#00CED1" data-skin="tron" data-thickness=".2" value="75">' 
-        + '</div>';
-
-        var button = '<div class="countdownControl btn btn-default btn-lg btn-block">Start</div>';
-        $('body').append(div);
-        $('.ccounter').append(button);
-
-        $('.countdownControl').click(function (event) {
+    $('.countdownControl').click(function (event) {
             var text = $(".countdownControl").text();
             if (text === "Start") {
                 var hours = $('.knob.hour').val();
@@ -29,9 +18,9 @@ function timer() {
                     t.hour()+":"+t.minutes()+":"+t.seconds()
                 );
                 
-                $(".countdownControl").text("Hide");
-            } else if (text === "Hide") {
-                $(".ccounter").remove();
+                $(".countdownControl").text("Reset");
+            } else if (text === "Reset") {
+                window.location.reload();
             }
         })
 
@@ -120,5 +109,24 @@ function timer() {
                 v = this.cv;
             }
         });
+}
+
+
+function hexToRgb(hex) {
+     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
     }
+
+
+
+function timeProgression(rS,gS,bS,rE,gE,bE) {
+
+
+
+    
+
 }

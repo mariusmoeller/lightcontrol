@@ -38,7 +38,32 @@ window.onload = function() {
 
 	$('#colors').minicolors();
 
-	$('#timer').click(function(){timer();});
+
+	$('#colorsStart').minicolors({
+		change: function(hex, opacity) {
+
+			var color = hexToRgb(hex);
+			var r = color.r;
+			var g = color.g;
+			var b = color.b;
+			probe();
+		}
+	});
+
+	$('#colorsStart').minicolors();
+
+	$('#colorsEnd').minicolors({
+		change: function(hex, opacity) {
+			var color = hexToRgb(hex);
+			var r = color.r;
+			var g = color.g;
+			var b = color.b;
+		}
+	});
+
+	$('#colorsEnd').minicolors();
+
+		
 
 	$('#btn-send-position').click(function() {
 		if ($('#btn-send-position').hasClass('btn-success'))
