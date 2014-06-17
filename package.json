@@ -11,6 +11,7 @@
     "socket.io": "~0.9.16",
     "artnet-node": "~0.1.0",
     "debug": "~0.8.1",
-    "nconf": "~0.6.9"
+    "nconf": "~0.6.9",
+    "lodash-node": "~2.4.1"
   }
 }

@@ -15,33 +15,22 @@ var path = require('path');
 var socketio = require('socket.io');
 var debug = require('debug')('app');
 var sanitize = require('./src/sanitize');
+var _ = require('lodash-node');
 
+// Set up configuration and command line arguments
 var nconf = require('nconf');
-nconf.file({ file: './config/config.json' });
+nconf.argv({
+        "a": {
+            alias: 'address',
+            describe: 'The IP Address of the artnet server'
+        },
+        "p": {
+            alias: 'port',
+            descirbe: 'Port of artnet server'
+        }
+    }).file({ file: './config/config.json' });
 
-// nconf.set('washs:0:r:channel', 8);
-// nconf.set('washs:0:g:channel', 9);
-// nconf.set('washs:0:b:channel', 10);
-// nconf.set('washs:0:on:channel', 11);
-// nconf.set('washs:0:on:value', 32);
-// nconf.set('washs:0:pan:channel', 4);
-// nconf.set('washs:0:tilt:channel', 6);
-// nconf.save();
-
-
-// Load artnet client with ip and port settings from command line
-var Artnet = require('./src/ArtnetClient');
-var artnetClient = new Artnet(process.argv[3], process.argv[5]);
-var movement = require('./src/movement');
-var Show = require('./src/Show');
-
-debug('start up');
-
-// print process.argv
-/*process.argv.forEach(function (val, index, array) {
-  console.log(index + ': ' + val);
-});*/
-
+// Set up express
 var app = express();
 
 // all environments
@@ -68,91 +57,62 @@ app.get('/pong', pongRoute.list);
 app.get('/car', carRoute.list);
 app.get('/controller', controllerRoute.list);
 
-debug('routes set up');
-
 var server = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
 
-debug('server started');
+// Load artnet client
+var Artnet = require('./src/ArtnetClient');
+var artnetClient = new Artnet(nconf.get('address'), nconf.get('port'));
+
+// Set up lights
+var Light = require('./src/Light');
+var MovingHead = require('./src/MovingHead');
+
+var washs = nconf.get('washs');
+_(washs).forEach(function(wash, i) {
+    washs[i] = new MovingHead(wash, artnetClient);
+});
+
+// Misc
+var Show = require('./src/Show');
 
 var record = false;
 var show = Show.createShow();
 
-socketio.listen(server).on('connection', function(socket) {
-	socket.on('movement', function(data) {
-        var wash = nconf.get('washs:0');
+// TODO: remove legacy light
+var washLight = new MovingHead(nconf.get('washs:0'), artnetClient);
+washLight.turnOn();
 
-        // console.log(wash);
-        debug('movement data comes in' + data);
+// Listen to socketio connections
+socketio.listen(server).on('connection', function(socket) {
+    socket.on('movement', function(data, lightID) {
 
         data = sanitize.movement(data);
-
-        var movementData = {};
-        movementData[wash.pan.channel] = data[2];
-        movementData[wash.tilt.channel] = data[0];
-
-        console.log(wash);
-
-    	// send to artnet server
-    	artnetClient.send(movementData);
+        washs[lightID].setPos(data[2], data[0]);
 
         debug('movement data send to artnet client, data: ' + data);
 
         if (record)
             show.addData(1, data);
-
-		console.log(data);
-	});
-
-    var wash = nconf.get('washs:0')
-    var movementDataC = {};
-    movementDataC[wash.pan.channel] = 0;
-    movementDataC[wash.tilt.channel] = 0;
-
+    });
     socket.on('move', function(step) {
-        console.log(step);
-        var wash = nconf.get('washs:0');
-
-        debug('movement data comes in' + movementDataC);
-
-        var data = movement.move(step);
-        if(data.x  == -1 || data.x == 1){
-            movementDataC[wash.pan.channel] += data.x;
-
-        }else{
-            movementDataC[wash.tilt.channel] += data.y;
-        }
-        // send to artnet server
-        artnetClient.send(movementDataC);
-
-        debug('movement data send to artnet client, data: ' + movementDataC);
-
-        if (record)
-            show.addData(1, data);
-
-        //console.log(movementDataC);
+        var lightID = 0;
+        washs[lightID].makeStep(step);
+        debug('movement data send to artnet client, direction: ' + step);
     });
 
-    socket.on('color', function(hexColor) {
-        var wash = nconf.get('washs:0');
+    socket.on('color', function(hexColor, lightID) {
+        debug('Recieved color data: ' + hexColor);
 
-        // cut off #, then convert string to base 16 number
+        // Cut off #, then convert string to base 16 number
         var num = parseInt(hexColor.substring(1), 16);
 
-        var channelData = {};
-        channelData[wash.r.channel] = num >> 16;
-        channelData[wash.g.channel] = num >> 8 & 255;
-        channelData[wash.b.channel] = num & 255;
-        channelData[wash.on.channel] = wash.on.value;
-        channelData[12] = 255;
-
-        // send to artnet server
-        artnetClient.send(channelData);
+        washs[lightID].setColor([num >> 16, num >> 8 & 255, num & 255])
 
         if (record)
             show.addData(2, [num >> 16, num >> 8 & 255, num & 255]);
-    })
+    });
 
     socket.on('startShow', function(show) {
         debug("Pong started");
@@ -167,64 +127,22 @@ socketio.listen(server).on('connection', function(socket) {
             var xPos = pong.getBallPos()[0] + 100;
             var yPos = pong.getBallPos()[1] + 100;
 
-            var movementData = {4: yPos, 6: xPos};
-
-            artnetClient.send(movementData);
-
+            washLight.setPos(yPos, xPos);
 
             pong.makeStep()
-
         }, 10);
     })
 
     socket.on('record', function(state) {
-        /*console.log(state);
-        if (state)
+        console.log(state);
+
+        if (state) {
             record = state;
-        else
+        } else {
             record = state
             //console.log(show.getAll())
             show.save();
-            show.deleteAll()*/
-
-
-        /*var i;
-        artnetClient.send({4: 0, 6: 0});
-
-        var interval = setInterval(function() {
-            artnetClient.send({4: 0, 6: i});
-            i++;
-            if (i < width)
-                clearInterval(interval);
-        }, 100);
-
-        /*for (var i = height; i < height; i++) {
-            artnetClient.send({4: i, 6: width});
+            show.deleteAll()
         }
-
-        for (var i = width; i < width; i++) {
-            artnetClient.send({4: 0, 6: i});
-        }
-
-        for (var i = height; i < height; i++) {
-            artnetClient.send({4: i, 6: width});
-        }*/
-
-
-        /*for (var i = 0; i < 100; i++) {
-            var xPos = pong.getBallPos()[0];
-            var yPos = pong.getBallPos()[1];
-
-            pong.makeStep()
-
-
-
-            // console.log(pong.getBallPos());
-
-        }*/
-
-
     })
-
-    // socket.on('')
 });
