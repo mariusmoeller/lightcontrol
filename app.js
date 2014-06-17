@@ -111,6 +111,7 @@ socketio.listen(server).on('connection', function(socket) {
     movementDataC[wash.tilt.channel] = 0;
 
     socket.on('move', function(step) {
+        console.log(step);
         var wash = nconf.get('washs:0');
 
         debug('movement data comes in' + movementDataC);
@@ -130,7 +131,7 @@ socketio.listen(server).on('connection', function(socket) {
         if (record)
             show.addData(1, data);
 
-        console.log(movementDataC);
+        //console.log(movementDataC);
     });
 
     socket.on('color', function(hexColor) {

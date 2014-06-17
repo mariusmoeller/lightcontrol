@@ -18,6 +18,7 @@
  */
 var lastId = 1000;
 var nextStep = {x:null, y:null};
+var lastStep = {x:null, y:null};
 var socket = io.connect();
 var tester = {
   // If the number exceeds this in any way, we treat the label as active
@@ -153,18 +154,29 @@ var tester = {
   },
 
   sendPos: function(value, horizontal){
-    if(horizontal){
-      //x
-      nextStep.x = value;
-    }else{
-      //y
-      nextStep.y = value;
-    }
+    if(value>0.5 || value<-0.5){
+        if(horizontal){
+          //x
+          nextStep.x = value;
+          nextStep.y = lastStep.y;
 
-    if(nextStep.x && nextStep.y){
-      this.move(nextStep);
-      nextStep = {x:null, y:null};
-    }
+          lastStep.x = value;
+        }else{
+          //y
+          nextStep.y = value;
+          nextStep.x = lastStep.x;
+
+          lastStep.y = value;
+        }
+
+        if(nextStep.x && nextStep.y){
+          if(nextStep !== lastStep){
+            this.move(nextStep);
+            lastStep = nextStep;
+            nextStep = {x:null, y:null};
+          }
+        }
+      }
   },
 
   move: function(step){
