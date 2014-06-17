@@ -170,11 +170,8 @@ var tester = {
         }
 
         if(nextStep.x && nextStep.y){
-          if(nextStep !== lastStep){
             this.move(nextStep);
             lastStep = nextStep;
-            nextStep = {x:null, y:null};
-          }
         }
       }
   },
