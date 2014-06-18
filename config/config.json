@@ -4,30 +4,30 @@
   "washs": {
     "0": {
       "r": {
-        "channel": 8
+        "channel": 4
       },
       "g": {
-        "channel": 9
+        "channel": 5
       },
       "b": {
-        "channel": 10
+        "channel": 6
       },
       "intensity": {
-          "channel": 12
+          "channel": 8
       },
       "on": {
-        "channel": 11,
+        "channel": 7,
         "value": 32
       },
       "off": {
-        "channel": 11,
-        "value": 0
+        "channel": 7,
+        "value": 10
       },
       "pan": {
-        "channel": 4
+        "channel": 0
       },
       "tilt": {
-        "channel": 6
+        "channel": 2
       }
     }
   }

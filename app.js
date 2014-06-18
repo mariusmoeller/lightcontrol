@@ -57,6 +57,8 @@ app.get('/pong', pongRoute.list);
 app.get('/car', carRoute.list);
 app.get('/controller', controllerRoute.list);
 
+app.get('/conf', function(req,res) {res.render('conf')});
+
 var server = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
@@ -144,16 +146,65 @@ socketio.listen(server).on('connection', function(socket) {
         }, 10);
     })
 
-    socket.on('record', function(state) {
-        console.log(state);
+    socket.on('record', function() {
+        var xData = [];
+        var yData = [];
 
-        if (state) {
-            record = state;
-        } else {
-            record = state
-            //console.log(show.getAll())
-            show.save();
-            show.deleteAll()
+        for (var i = 0; i < 200; i++) {
+            if (i < 50) {
+                xData[i] = 1
+                yData[i] = 0
+            } else if (i < 100) {
+                xData[i] = 0
+                yData[i] = 1
+            } else if (i < 150) {
+                xData[i] = -1
+                yData[i] = 0
+            } else if (i < 200) {
+                xData[i] = 0
+                yData[i] = -1
+            }
         }
+
+        sendDataDelayed(xData, yData, 20);
+        console.log(washs[0]);
     })
+
+    // TODO: Move this to somewhere
+    var sendDataDelayed = function(x, y, delay) {
+        var i = 0;
+
+        var timer = setInterval(function() {
+            // TODO: Actually terminate timer not just let it running
+            if (i < 400) {
+                washs[0].move(x[i], y[i]);
+                i++;
+                console.log(x[i] + " y: " + y[i]);
+            } else {
+                clearInterval(timer);
+            }
+            console.log("times is running");
+        }, delay);
+
+        setTimeout(function() {
+            clearInterval(timer);
+        }, delay * y.length + 100);
+    }
+
+    socket.on('direct', function(data) {
+        debug('Data send: ' = data);
+        artnetClient.send(data);
+    });
+    // socket.on('record', function(state) {
+    //     console.log(state);
+    //
+    //     if (state) {
+    //         record = state;
+    //     } else {
+    //         record = state
+    //         //console.log(show.getAll())
+    //         show.save();
+    //         show.deleteAll()
+    //     }
+    // })
 });

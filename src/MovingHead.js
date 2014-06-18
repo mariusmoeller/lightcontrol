@@ -25,6 +25,7 @@ MovingHead.prototype.setPos = function(x, z) {
     data[this.conf.pan.channel] = x;
     data[this.conf.tilt.channel] = z;
     // console.log(this.artnet);
+    console.log(data);
     this.artnet.send(data);
 }
 

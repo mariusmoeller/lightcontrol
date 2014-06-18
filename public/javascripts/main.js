@@ -54,6 +54,17 @@ window.onload = function() {
 		socket.emit('startShow');
 	});
 
+	$('#btn-send-dmx').click(function() {
+		var data = {}
+		var channel = $('#dmx-channel');
+		var value = $('#dmx-value');
+
+		data[channel] = value;
+
+		var socket = io.connect();
+		socket.emit('direct', data);
+	});
+
 	$('#btn-record').click(function() {
 		var socket = io.connect();
 		if ($(this).hasClass('btn-default')) {
