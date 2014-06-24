@@ -56,4 +56,25 @@ MovingHead.prototype.makeStep = function(direction) {
     this.artnet.send(data);
 }
 
+MovingHead.prototype.setPosDelayed = function(x, y, delay) {
+    var i = 0;
+
+    var thisContext = this;
+    var timer = setInterval(function() {
+        // TODO: Actually terminate timer accurately not just guess
+        if (i < x.length) {
+            thisContext.move(x[i], y[i]);
+            i++;
+        } else {
+            // This would be clear termination, doesen't seem to work though
+            // because timer variable is probably not available here
+            clearInterval(timer);
+        }
+    }, delay);
+
+    setTimeout(function() {
+        clearInterval(timer);
+    }, delay * x.length + 100);
+}
+
 module.exports = MovingHead;

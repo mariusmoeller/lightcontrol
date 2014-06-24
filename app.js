@@ -138,6 +138,8 @@ socketio.listen(server).on('connection', function(socket) {
     })
 
     socket.on('record', function() {
+
+        // Draw rectangle
         var xData = [];
         var yData = [];
 
@@ -157,35 +159,14 @@ socketio.listen(server).on('connection', function(socket) {
             }
         }
 
-        sendDataDelayed(xData, yData, 20);
-        console.log(washs[0]);
+        washs[0].setPosDelayed(xData, yData, 20);
     })
-
-    // TODO: Move this to somewhere
-    var sendDataDelayed = function(x, y, delay) {
-        var i = 0;
-
-        var timer = setInterval(function() {
-            // TODO: Actually terminate timer not just let it running
-            if (i < 400) {
-                washs[0].move(x[i], y[i]);
-                i++;
-                console.log(x[i] + " y: " + y[i]);
-            } else {
-                clearInterval(timer);
-            }
-            console.log("times is running");
-        }, delay);
-
-        setTimeout(function() {
-            clearInterval(timer);
-        }, delay * y.length + 100);
-    }
 
     socket.on('direct', function(data) {
         debug('Data send: ' = data);
         artnetClient.send(data);
     });
+
     // socket.on('record', function(state) {
     //     console.log(state);
     //
