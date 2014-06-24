@@ -17,6 +17,9 @@
  * @author mwichary@google.com (Marcin Wichary)
  */
 var lastId = 1000;
+var nextStep = {x:null, y:null};
+var lastStep = {x:null, y:null};
+var socket = io.connect();
 var tester = {
   // If the number exceeds this in any way, we treat the label as active
   // and highlight it.
@@ -119,6 +122,10 @@ var tester = {
    * Update a given analogue stick on the screen.
    */
   updateAxis: function(value, gamepadId, labelId, stickId, horizontal) {
+  if(stickId == "stick-2"){
+      this.sendPos(value, horizontal);
+    }
+
     var gamepadEl = document.querySelector('#gamepad-' + gamepadId);
 
     // Update the stick visually.
@@ -136,17 +143,72 @@ var tester = {
   },
 
   buttonPressed: function(id) {
-    //if(id!=lastId){
-      var socket = io.connect();
-      var orientation = [];
-      switch(id){
-        case "1": orientation = "backward"; break; //move down
-        case "2": orientation = "right"; break; //move right
-        case "3": orientation = "left"; break; //move left
-        case "4": orientation = "forward"; break; //move up
+    var orientation = [];
+    switch(id){
+      case "1": orientation = "backward"; break; //move down
+      case "2": orientation = "right"; break; //move right
+      case "3": orientation = "left"; break; //move left
+      case "4": orientation = "forward"; break; //move up
+    }
+    socket.emit('move', orientation);
+  },
+
+  sendPos: function(value, horizontal){
+    if(value>0.5 || value<-0.5){
+        if(horizontal){
+          //x
+          nextStep.x = value;
+          nextStep.y = lastStep.y;
+
+          lastStep.x = value;
+        }else{
+          //y
+          nextStep.y = value;
+          nextStep.x = lastStep.x;
+
+          lastStep.y = value;
+        }
+
+        if(nextStep.x && nextStep.y){
+            this.move(nextStep);
+            lastStep = nextStep;
+        }
       }
-      socket.emit('move', orientation);
-    // }
-    lastId = id;
+  },
+
+  move: function(step){
+    var x = step.x;
+    var y = step.y;
+    var orientation;
+    if(x > 0){
+      if(y>0){
+        if(x>y){
+          orientation = "right";
+        }else{
+          orientation = "backward";
+        }
+      }else{
+        if(x>y){
+          orientation = "right";
+        }else{
+          orientation = "forward";
+        }
+      }
+    }else{
+      if(y>0){
+        if(y>x){
+          orientation = "backward";
+        }else{
+          orientation = "left";
+        }
+      }else{
+        if(y>x){
+          orientation = "left";
+        }else{
+          orientation = "forward";
+        }
+      }
+    }
+    socket.emit('move', orientation);
   }
 };

@@ -101,18 +101,9 @@ socketio.listen(server).on('connection', function(socket) {
 	});
 
     socket.on('move', function(step) {
-
-        // var data = movement.move(step);
-        switch(step){
-                                   // y, x
-            case "forward":  washLight.move(0, 5);break;
-            case "backward": washLight.move(0, -5);break;
-            case "left":     washLight.move(-3, 0);break;
-            case "right":    washLight.move(3, 0);break;
-        }
-
-        if (record)
-            show.addData(1, data);
+        var lightID = 0;
+        washs[lightID].makeStep(step);
+        debug('movement data send to artnet client, direction: ' + step);
     });
 
     socket.on('color', function(hexColor, lightID) {
