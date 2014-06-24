@@ -18,14 +18,13 @@ MovingHead.prototype.turnOn = function() {
 
 MovingHead.prototype.setPos = function(x, z) {
     // Remember position
-    // this.x = x;
-    // this.z = z;
+    this.x = x;
+    this.z = z;
 
     var data = {};
     data[this.conf.pan.channel] = x;
     data[this.conf.tilt.channel] = z;
-    // console.log(this.artnet);
-    console.log(data);
+
     this.artnet.send(data);
 }
 
@@ -48,7 +47,7 @@ MovingHead.prototype.makeStep = function(direction) {
         case "left":     this.x--;break;
         case "right":    this.x++;break;
     }
-    
+
     var data = {};
     data[this.conf.pan.channel] = this.x;
     data[this.conf.tilt.channel] = this.z;

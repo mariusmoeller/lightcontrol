@@ -77,7 +77,7 @@ _(washs).forEach(function(wash, i) {
 });
 
 // Misc
-var movement = require('./src/movement');
+// var movement = require('./src/movement');
 var Show = require('./src/Show');
 
 var record = false;
