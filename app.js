@@ -57,7 +57,8 @@ app.get('/pong', pongRoute.list);
 app.get('/car', carRoute.list);
 app.get('/controller', controllerRoute.list);
 
-app.get('/conf', function(req,res) {res.render('conf')});
+app.get('/conf', function(req, res) {res.render('conf')});
+app.get('/draw', function(req, res) {res.render('draw')});
 
 var server = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
@@ -137,29 +138,29 @@ socketio.listen(server).on('connection', function(socket) {
         }, 10);
     })
 
-    socket.on('record', function() {
+    socket.on('record', function(xData, yData) {
 
-        // Draw rectangle
-        var xData = [];
-        var yData = [];
+        // // Draw rectangle
+        // var xData = [];
+        // var yData = [];
+        //
+        // for (var i = 0; i < 200; i++) {
+        //     if (i < 50) {
+        //         xData[i] = 1
+        //         yData[i] = 0
+        //     } else if (i < 100) {
+        //         xData[i] = 0
+        //         yData[i] = 1
+        //     } else if (i < 150) {
+        //         xData[i] = -1
+        //         yData[i] = 0
+        //     } else if (i < 200) {
+        //         xData[i] = 0
+        //         yData[i] = -1
+        //     }
+        // }
 
-        for (var i = 0; i < 200; i++) {
-            if (i < 50) {
-                xData[i] = 1
-                yData[i] = 0
-            } else if (i < 100) {
-                xData[i] = 0
-                yData[i] = 1
-            } else if (i < 150) {
-                xData[i] = -1
-                yData[i] = 0
-            } else if (i < 200) {
-                xData[i] = 0
-                yData[i] = -1
-            }
-        }
-
-        washs[0].setPosDelayed(xData, yData, 20);
+        washs[0].setPosDelayed(xData, yData, 40);
     })
 
     socket.on('direct', function(data) {

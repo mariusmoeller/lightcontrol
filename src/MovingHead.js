@@ -63,7 +63,7 @@ MovingHead.prototype.setPosDelayed = function(x, y, delay) {
     var timer = setInterval(function() {
         // TODO: Actually terminate timer accurately not just guess
         if (i < x.length) {
-            thisContext.move(x[i], y[i]);
+            thisContext.setPos(x[i], y[i]);
             i++;
         } else {
             // This would be clear termination, doesen't seem to work though
