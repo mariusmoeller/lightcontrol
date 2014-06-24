@@ -42,11 +42,13 @@ window.onload = function() {
 	$('#colorsStart').minicolors({
 		change: function(hex, opacity) {
 
-			var color = hexToRgb(hex);
-			var r = color.r;
-			var g = color.g;
-			var b = color.b;
-			probe();
+			// hex zu HSL
+
+			var color = hexToHsl(hex);
+
+			//console.log(color);		
+			timeProgression();
+			
 		}
 	});
 
@@ -54,10 +56,19 @@ window.onload = function() {
 
 	$('#colorsEnd').minicolors({
 		change: function(hex, opacity) {
-			var color = hexToRgb(hex);
-			var r = color.r;
-			var g = color.g;
-			var b = color.b;
+			
+
+			// hex zu HSL
+
+			var color = hexToHsl(hex);
+
+
+			//console.log(color);
+			timeProgression();			
+
+
+			
+
 		}
 	});
 
