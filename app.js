@@ -17,7 +17,7 @@ var debug = require('debug')('app');
 var sanitize = require('./src/sanitize');
 var _ = require('lodash-node');
 
-// Set up configuration and command line arguments
+// Load configuration and command line arguments
 var nconf = require('nconf');
 nconf.argv({
         "a": {
@@ -78,13 +78,12 @@ _(washs).forEach(function(wash, i) {
 });
 
 // Misc
-// var movement = require('./src/movement');
 var Show = require('./src/Show');
 
 var record = false;
 var show = Show.createShow();
 
-// TODO: remove legacy light
+// TODO: remove legacy light, always send light id from frontend
 var washLight = new MovingHead(nconf.get('washs:0'), artnetClient);
 washLight.turnOn();
 
@@ -138,35 +137,14 @@ socketio.listen(server).on('connection', function(socket) {
         }, 10);
     })
 
+    // TODO: Make own event or path for draw
     socket.on('record', function(xData, yData) {
-
-        // // Draw rectangle
-        // var xData = [];
-        // var yData = [];
-        //
-        // for (var i = 0; i < 200; i++) {
-        //     if (i < 50) {
-        //         xData[i] = 1
-        //         yData[i] = 0
-        //     } else if (i < 100) {
-        //         xData[i] = 0
-        //         yData[i] = 1
-        //     } else if (i < 150) {
-        //         xData[i] = -1
-        //         yData[i] = 0
-        //     } else if (i < 200) {
-        //         xData[i] = 0
-        //         yData[i] = -1
-        //     }
-        // }
+        _(yData).forEach(function(value, i) {
+            yData[i] = sanitize.movement([0,0, value])[2];
+        })
 
         washs[0].setPosDelayed(xData, yData, 40);
     })
-
-    socket.on('direct', function(data) {
-        debug('Data send: ' = data);
-        artnetClient.send(data);
-    });
 
     // socket.on('record', function(state) {
     //     console.log(state);
@@ -180,4 +158,8 @@ socketio.listen(server).on('connection', function(socket) {
     //         show.deleteAll()
     //     }
     // })
+    socket.on('direct', function(data) {
+        debug('Data send: ' = data);
+        artnetClient.send(data);
+    });
 });
