@@ -88,10 +88,12 @@ html
                 b.caret
               ul.dropdown-menu
                 li
+                  a(href='/draw') Draw
+                li
                   a(href='#')#timer Timer
                 li
                   a(href='/controller')#controller Controller
-                  
+
             li.dropdown
               a.dropdown-toggle(href='#', data-toggle='dropdown')
                 | On / Off
@@ -102,6 +104,8 @@ html
                 li
                   a(href='#') Moving Head On / Off
                 li.divider
+                li
+                  a(href='/conf') Configuration
                 li
                   a(href='#') All On / Off
         // /.navbar-collapse

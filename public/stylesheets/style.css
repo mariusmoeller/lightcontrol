@@ -32,3 +32,16 @@ img {
     display: inline-block;
     cursor: pointer;
 }
+
+#sliders {
+    overflow-x: auto;
+    white-space: nowrap;
+    overflow-y: hidden;
+}
+
+input[type=range] {
+    -webkit-appearance: slider-vertical;
+    display: inline !important;
+    width: 30px !important;
+    height: 200px;
+}

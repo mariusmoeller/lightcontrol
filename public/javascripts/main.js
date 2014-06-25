@@ -78,14 +78,14 @@ window.onload = function() {
 	});
 
 	if ($('#drawing-board').length) {
-		var width = 50;
+		var width = 200;
 		var height = 50;
 
 		// TODO: remove globals
 		xData = [];
 		yData = [];
 
-		for (var y = width; y > 0; y--) {
+		for (var y = width; y > 0; y -= 4) {
 			$("<tr></tr>").attr('id', 'row-' + y).appendTo("#drawing-board");
 			for (var x = 0; x < height; x++) {
 				$( "<td></td>" )

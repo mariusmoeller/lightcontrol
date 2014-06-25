@@ -159,7 +159,7 @@ socketio.listen(server).on('connection', function(socket) {
     //     }
     // })
     socket.on('direct', function(data) {
-        debug('Data send: ' = data);
+        console.log(data);
         artnetClient.send(data);
     });
 });
