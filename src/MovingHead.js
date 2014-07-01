@@ -4,8 +4,8 @@ var util = require('util');
 function MovingHead() {
     Light.apply(this, Array.prototype.slice.call(arguments));
     this._super = Light.prototype;
-    this.x = 0;
-    this.z = 0;
+    this.pan = 0;
+    this.tilt = 0;
 }
 
 MovingHead.prototype.setColor = function(hex) {
@@ -16,33 +16,36 @@ MovingHead.prototype.turnOn = function() {
     Light.prototype.turnOn.call(this);
 }
 
-MovingHead.prototype.setPos = function(x, z) {
+MovingHead.prototype.setPos = function(pan, tilt) {
     // Remember position
-    this.x = x;
-    this.z = z;
+    this.pan = pan;
+    this.tilt = tilt;
 
     var data = {};
-    data[this.conf.pan.channel] = x;
-    data[this.conf.tilt.channel] = z;
+    data[this.conf.pan.channel] = pan;
+    data[this.conf.tilt.channel] = tilt;
+
+    console.log(data);
 
     this.artnet.send(data);
 }
 
-MovingHead.prototype.setPosByDegrees = function(x, z) {
-    var xConst = 255 / [this.conf.pan.max];
-    var zConst = 255 / [this.conf.tilt.max];
+MovingHead.prototype.setPosByDegrees = function(pan, tilt) {
+    var tiltConst = 255 / [this.conf.tilt.max];
+    var panConst = 255 / [this.conf.pan.max];
 
-    this.setPos(x * xConst, z * zConst);
+    this.setPos(Math.round(pan * panConst), Math.round(tilt * tiltConst));
 }
 
-MovingHead.prototype.move = function(x, z) {
-    this.x += x;
-    this.z += z;
+MovingHead.prototype.move = function(pan, tilt) {
+    this.pan += pan;
+    this.tilt += tilt;
 
     var data = {};
-    data[this.conf.pan.channel] = this.x;
-    data[this.conf.tilt.channel] = this.z;
-    console.log("x: "+this.x+" y: "+this.y);
+    data[this.conf.tilt.channel] = this.tilt;
+    data[this.conf.pan.channel] = this.pan;
+
+    console.log("pan: " + this.pan + " til: " + this.tilt);
 
     this.artnet.send(data);
 }
@@ -56,21 +59,21 @@ MovingHead.prototype.makeStep = function(direction) {
     }
 
     var data = {};
-    data[this.conf.pan.channel] = this.x;
-    data[this.conf.tilt.channel] = this.z;
+    data[this.conf.tilt.channel] = this.x;
+    data[this.conf.pan.channel] = this.z;
     console.log("x: "+this.x+" y: "+this.z);
 
     this.artnet.send(data);
 }
 
-MovingHead.prototype.setPosDelayed = function(x, y, delay) {
+MovingHead.prototype.setPosDelayed = function(pan, tilt, delay) {
     var i = 0;
 
     var thisContext = this;
     var timer = setInterval(function() {
         // TODO: Actually terminate timer accurately not just guess
         if (i < x.length) {
-            thisContext.setPos(x[i], y[i]);
+            thisContext.setPos(pan[i], tilt[i]);
             i++;
         } else {
             // This would be clear termination, doesen't seem to work though

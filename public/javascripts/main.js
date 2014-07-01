@@ -2,15 +2,23 @@ function handleOrientation(event) {
 
 	var socket = io.connect();
 
-	var z = event.alpha;
-	var x = event.beta;
-	var y = event.gamma;
 
-	var orientation = [x, y, z];
+	// var x = event.beta;
+	// var y = event.gamma;
+	// var z = event.alpha;
+
+	// var orientation = [event.alpha, event.beta, event.gamma];
 	// var oriententation = ['0','0','0','0',x,'0',z];
+	var orientation = {};
+	orientation['alpha'] = event.alpha;
+	orientation['beta'] = event.beta;
+	orientation['gamma'] = event.gamma;
 
-	// document.getElementById("x").innerHTML = x;
-	// document.getElementById("y").innerHTML = y;
+
+	document.getElementById("alpha").innerHTML = event.alpha;
+	document.getElementById("beta").innerHTML = event.beta;
+	document.getElementById("gamma").innerHTML = event.gamma;
+
 
 	// TODO: send proper light id
 	socket.emit('movement', orientation, 0);

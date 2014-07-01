@@ -103,11 +103,12 @@ socketio.listen(server).on('connection', function(socket) {
 
 	socket.on('movement', function(data, id) {
 
-        data = sanitize.movement(data);
-        // TODO: is Z and X swapped? pan should be z and tilt x?
-        devices[0].setPos(data[2], data[0]);
-
         debug('movement data send to artnet client, data: ' + data);
+
+        // data = sanitize.movement(data);
+        // devices[0].setPos(data[2], data[0]);
+        devices[0].setPosByDegrees(data['alpha'], data['beta'] + 90)
+
 
         if (record)
             show.addData(1, data);
