@@ -185,8 +185,19 @@ function hslToRgb(h, s, l){
 }
 
 
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+function rgbToHex(r, g, b) {
+    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
 
     function timeProgression() {
+        
+       debugger;
         if (!$.isEmptyObject(startColor) && !$.isEmptyObject(endColor)) {
 
             
@@ -194,8 +205,6 @@ function hslToRgb(h, s, l){
             
 
             console.log(sec);
-
-
 
 
             var hPerS = Math.abs((endColor.h - startColor.h)) / sec;
@@ -210,6 +219,9 @@ function hslToRgb(h, s, l){
             var sE = endColor.s;
             var lE = endColor.l;
 
+            var socket = io.connect();
+
+
             console.log(startColor);
             console.log(endColor);
 
@@ -217,11 +229,14 @@ function hslToRgb(h, s, l){
 
             counter=0;
 
-            while(counter<sec){
 
-                setTimeout(function(){  
+            var test = [];
 
-                
+
+            while(counter < sec){
+
+              //  setTimeout(function(){  
+
 
 
                     hS += hPerS;
@@ -230,16 +245,27 @@ function hslToRgb(h, s, l){
 
                     colors = [hS,sS,lS];
 
+                    var RGB = hslToRgb(hS,sS,lS);
+
+                    var hex = rgbToHex(RGB[0],RGB[1],RGB[2]);
+
+                    test[counter] = hex;
+                    
+                    // TODO: send proper light id
+                    //socket.emit('color', hex, 0);
+                    
+                    
 
                     counter++;
 
                     
-                }, 5000);
+               // }, 2000);
 
             }
           
-            return color;
-
+           // return test;
+            console.log(test);
+            socket.emit("timer",test);
 
 
     }

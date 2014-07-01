@@ -156,6 +156,29 @@ socketio.listen(server).on('connection', function(socket) {
             //console.log(show.getAll())
             show.save();
             show.deleteAll()
+
         }
+    })
+
+
+    socket.on("timer",function(colorArray){
+        var counter = 0;
+
+        var i = setInterval(function() {
+             var hexColor = colorArray[counter];
+
+             var num = parseInt(hexColor.substring(1), 16);
+
+            washs[0].setColor([num >> 16, num >> 8 & 255, num & 255])
+
+            console.log(num);
+
+            counter++;
+
+            if(counter == colorArray.length)
+                clearInterval(i);
+
+        }, 1000);
+
     })
 });

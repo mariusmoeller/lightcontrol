@@ -32,7 +32,7 @@ window.onload = function() {
 
 			// TODO: send proper light id
 			socket.emit('color', hex, 0);
-			// console.log(hex + ' - ' + opacity);
+			//console.log(hex + ' - ' + opacity);
 		}
 	});
 
@@ -46,13 +46,20 @@ window.onload = function() {
 
 			var color = hexToHsl(hex);
 
+			startColor = color;
+
 			//console.log(color);		
-			timeProgression();
+			//timeProgression();
 			
 		}
 	});
 
 	$('#colorsStart').minicolors();
+
+
+
+
+
 
 	$('#colorsEnd').minicolors({
 		change: function(hex, opacity) {
@@ -61,13 +68,19 @@ window.onload = function() {
 			// hex zu HSL
 
 			var color = hexToHsl(hex);
-
-
-			//console.log(color);
-			timeProgression();			
-
-
 			
+			endColor = color;
+
+
+/*
+			console.log(color);
+			console.log(color2);*/
+
+			//timeProgression();			
+
+
+
+			//console.log(farbe);
 
 		}
 	});
