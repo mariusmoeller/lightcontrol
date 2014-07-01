@@ -95,10 +95,17 @@ devices[0].turnOn();
 // TODO: Change to streaming socketio for improved performance
 // Listen to socketio connections
 socketio.listen(server).on('connection', function(socket) {
+    socket.on('setPosByDegrees', function(degrees) {
+        debug('setPosByDegrees: ' + degrees.toString());
+
+        devices[0].setPosByDegrees(degrees[0], degrees[1]);
+    })
+
 	socket.on('movement', function(data, id) {
 
         data = sanitize.movement(data);
-        devices[id].setPos(data[2], data[0]);
+        // TODO: is Z and X swapped? pan should be z and tilt x?
+        devices[0].setPos(data[2], data[0]);
 
         debug('movement data send to artnet client, data: ' + data);
 
@@ -114,6 +121,8 @@ socketio.listen(server).on('connection', function(socket) {
 
     socket.on('color', function(hexColor, id) {
         debug('Recieved color data: ' + hexColor);
+        if (typeof id == 'undefined')
+            id = 0;
 
         // Cut off #, then convert string to base 16 number
         var num = parseInt(hexColor.substring(1), 16);
