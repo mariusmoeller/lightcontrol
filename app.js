@@ -68,18 +68,18 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 var Artnet = require('./src/ArtnetClient');
 var artnetClient = new Artnet(nconf.get('address'), nconf.get('port'));
 
-// Set up lights
-var Light = require('./src/Light');
-var MovingHead = require('./src/MovingHead');
+// Load device classes
+var Devices = {};
+require("fs").readdirSync("./src/devices").forEach(function(file) {
+  Devices[file.substr(0, file.length-3)] = require("./src/devices/" + file);
+});
 
-// TODO: It might be better to change hierarchy to:
-// device {id: X, type: X} so that each light, moving head etc has a unique id
-// object creation depending on type a la new DeviceType(conf, artnetClient)
+console.log(Devices);
 
+// Set up configures devices
 var devices = nconf.get('devices');
 _(devices).forEach(function(device, i) {
-    // TODO: Allow different devices, not only moving heads
-    devices[i] = new MovingHead(device, artnetClient);
+    devices[i] = new Devices[device.type](device, artnetClient);
 });
 
 // Misc
