@@ -1,14 +1,10 @@
 function handleOrientation(event) {
-
-	var socket = io.connect();
-
-
 	// var x = event.beta;
 	// var y = event.gamma;
 	// var z = event.alpha;
 
 	// var orientation = [event.alpha, event.beta, event.gamma];
-	// var oriententation = ['0','0','0','0',x,'0',z];
+
 	var orientation = {};
 	orientation['alpha'] = event.alpha;
 	orientation['beta'] = event.beta;
@@ -19,13 +15,14 @@ function handleOrientation(event) {
 	document.getElementById("beta").innerHTML = event.beta;
 	document.getElementById("gamma").innerHTML = event.gamma;
 
-
-	// TODO: send proper light id
 	socket.emit('movement', orientation, 0);
 }
 
 
 window.onload = function() {
+	// TODO: remove global
+	socket = io.connect();
+
 	$.minicolors.defaults = $.extend($.minicolors.defaults, {
 		changeDelay: 0,
 		letterCase: 'uppercase',
@@ -36,8 +33,6 @@ window.onload = function() {
 
 	$('#colors').minicolors({
 		change: function(hex, opacity) {
-			var socket = io.connect();
-
 			// TODO: send proper light id
 			socket.emit('color', hex, 0);
 			// console.log(hex + ' - ' + opacity);
@@ -58,7 +53,6 @@ window.onload = function() {
 	});
 
 	$('#btn-start-game').click(function() {
-		var socket = io.connect();
 		socket.emit('startShow');
 	});
 
@@ -69,12 +63,10 @@ window.onload = function() {
 
 		data[channel] = value;
 
-		var socket = io.connect();
 		socket.emit('direct', data);
 	});
 
 	$('#btn-record').click(function() {
-		var socket = io.connect();
 		if ($(this).hasClass('btn-default')) {
 			$(this).addClass('btn-danger');
 			socket.emit('record', true);
@@ -128,7 +120,6 @@ window.onload = function() {
 		}
 	}
 	$('#btn-send-data').click(function() {
-		var socket = io.connect();
 		socket.emit('record', xData, yData);
 		// xData = [];
 		// yData = [];
