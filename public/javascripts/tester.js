@@ -154,25 +154,25 @@ var tester = {
   },
 
   sendPos: function(value, horizontal){
-    if(value>0.5 || value<-0.5){
+    if(value>0.75 || value<-0.75){
         if(horizontal){
           //x
           nextStep.x = value;
-          nextStep.y = lastStep.y;
+          nextStep.y = 0;
 
           lastStep.x = value;
         }else{
           //y
           nextStep.y = value;
-          nextStep.x = lastStep.x;
+          nextStep.x = 0;
 
           lastStep.y = value;
         }
 
-        if(nextStep.x && nextStep.y){
+//        if(nextStep.x && nextStep.y){
             this.move(nextStep);
             lastStep = nextStep;
-        }
+  //      }
       }
   },
 
