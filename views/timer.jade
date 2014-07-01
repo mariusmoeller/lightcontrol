@@ -1,0 +1,33 @@
+extends layout
+
+block content
+  .container
+   .row
+    .row.top-space
+     .col-md-3
+      div#colorsStart
+     .col-md-3
+      div#colorsEnd
+
+
+    .row.top-space
+     .col-md-12
+      .ccounter
+        input.knob.hour(data-readonly='false', data-width='150', data-min='0', data-max='24', data-displayprevious='true', data-fgcolor='#66EE66', data-skin='tron', data-thickness='.2', value='0')
+        input.knob.minute(data-readonly='false', data-width='150', data-min='0', data-max='60', data-displayprevious='true', data-fgcolor='#ffec03', data-skin='tron', data-thickness='.2', value='0')
+        input.knob.second(data-readonly='false', data-width='150', data-min='0', data-max='60', data-displayprevious='true', data-fgcolor='#00CED1', data-skin='tron', data-thickness='.2', value='0')
+
+      
+       .row
+        .col-md-5
+         .countdownControl.btn.btn-default.btn-lg.btn-block Start
+
+
+append javascript
+    script(src='/lib/moment.js')
+    script(src='/javascripts/timer.js')
+    script(src='/lib/countdown/jquery.knob.js')
+    script(src='/lib/countdown/jquery.ccountdown.js')
+    script.
+     timer();
+          

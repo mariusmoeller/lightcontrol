@@ -32,13 +32,62 @@ window.onload = function() {
 
 			// TODO: send proper light id
 			socket.emit('color', hex, 0);
-			// console.log(hex + ' - ' + opacity);
+			//console.log(hex + ' - ' + opacity);
 		}
 	});
 
 	$('#colors').minicolors();
 
-	$('#timer').click(function(){timer();});
+
+	$('#colorsStart').minicolors({
+		change: function(hex, opacity) {
+
+			// hex zu HSL
+
+			var color = hexToHsl(hex);
+
+			startColor = color;
+
+			//console.log(color);		
+			//timeProgression();
+			
+		}
+	});
+
+	$('#colorsStart').minicolors();
+
+
+
+
+
+
+	$('#colorsEnd').minicolors({
+		change: function(hex, opacity) {
+			
+
+			// hex zu HSL
+
+			var color = hexToHsl(hex);
+			
+			endColor = color;
+
+
+/*
+			console.log(color);
+			console.log(color2);*/
+
+			//timeProgression();			
+
+
+
+			//console.log(farbe);
+
+		}
+	});
+
+	$('#colorsEnd').minicolors();
+
+		
 
 	$('#btn-send-position').click(function() {
 		if ($('#btn-send-position').hasClass('btn-success'))
