@@ -19,7 +19,12 @@
 var lastId = 1000;
 var nextStep = {x:null, y:null};
 var socket = io.connect();
-var method = 2;
+var method = 0;
+
+$('#methodList').change(function(){ 
+      method = $("#methodList")[0].selectedIndex ;
+})
+
 var gasPressed = false;
 var breakPressed = false;
 var tester = {
