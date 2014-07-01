@@ -16,14 +16,24 @@ MovingHead.prototype.turnOn = function() {
     Light.prototype.turnOn.call(this);
 }
 
+var limitRange = function(value) {
+    if (value < 0) {
+        return 0;
+    } else if (value > 255) {
+        return 255;
+    } else {
+        return value;
+    }
+}
+
 MovingHead.prototype.setPos = function(pan, tilt) {
     // Remember position
     this.pan = pan;
     this.tilt = tilt;
 
     var data = {};
-    data[this.conf.pan.channel] = pan;
-    data[this.conf.tilt.channel] = tilt;
+    data[this.conf.pan.channel] = limitRange(pan);
+    data[this.conf.tilt.channel] = limitRange(tilt);
 
     console.log(data);
 
@@ -37,17 +47,12 @@ MovingHead.prototype.setPosByDegrees = function(pan, tilt) {
     this.setPos(Math.round(pan * panConst), Math.round(tilt * tiltConst));
 }
 
+
 MovingHead.prototype.move = function(pan, tilt) {
     this.pan += pan;
     this.tilt += tilt;
 
-    var data = {};
-    data[this.conf.tilt.channel] = this.tilt;
-    data[this.conf.pan.channel] = this.pan;
-
-    console.log("pan: " + this.pan + " til: " + this.tilt);
-
-    this.artnet.send(data);
+    this.setPos(this.pan, this.tilt);
 }
 
 MovingHead.prototype.makeStep = function(direction) {

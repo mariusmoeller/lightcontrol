@@ -107,6 +107,7 @@ socketio.listen(server).on('connection', function(socket) {
 
         // data = sanitize.movement(data);
         // devices[0].setPos(data[2], data[0]);
+
         devices[0].setPosByDegrees(data['alpha'], data['beta'] + 90)
 
 
