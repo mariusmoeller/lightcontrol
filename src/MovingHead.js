@@ -55,6 +55,16 @@ MovingHead.prototype.makeStep = function(direction) {
         case "right":    this.x++;break;
     }
 
+    if(this.z > 255){
+        this.z = 255;
+    }else if(this.z < 0){
+        this.z = 0;
+    }else if(this.x > 255){
+        this.x = 255;
+    }else if(this.x < 0){
+        this.x = 0;
+    }
+
     var data = {};
     data[this.conf.pan.channel] = this.x;
     data[this.conf.tilt.channel] = this.z;

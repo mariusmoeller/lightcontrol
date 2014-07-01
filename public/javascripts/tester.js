@@ -19,6 +19,9 @@
 var lastId = 1000;
 var nextStep = {x:null, y:null};
 var socket = io.connect();
+var method = 2;
+var gasPressed = false;
+var breakPressed = false;
 var tester = {
   // If the number exceeds this in any way, we treat the label as active
   // and highlight it.
@@ -104,14 +107,62 @@ var tester = {
 
     // Update the button visually.
     var buttonEl = gamepadEl.querySelector('[name="' + id + '"]');
+    var bId = id.substring(id.length-1);
+    
+    if(method == 1){
+      if(id == "button-right-shoulder-bottom"){
+        if(buttonEl.classList[1]){
+          gasPressed = true;
+        }else{
+          gasPressed = false;
+        }
+      }else if(id == "button-left-shoulder-bottom"){
+        if(buttonEl.classList[1]){
+          breakPressed = true;
+        }else{
+          breakPressed = false;
+        }
+      }
+    }
+
     if (buttonEl) { // Extraneous buttons have just a label.
       if (pressed) {
         buttonEl.classList.add('pressed');
         var buttonId = id.substring(id.length-1);
         if(buttonId >= 1 && buttonId <= 4){
-          this.buttonPressed(buttonId);
+          if(method == 0)
+            this.buttonPressed(buttonId);
+          if(method == 2){
+            var orientation = "";
+            if(buttonId == 1){
+              orientation = "forward";
+              gasPressed = true;
+            }else if(buttonId == 3){
+              orientation = "backward";
+              breakPressed = true;
+            }
+            socket.emit('move', orientation);
+          }
+        }
+        if(buttonId == "m" && method == 1){
+          var orientation = "";
+          if(id == "button-left-shoulder-bottom"){
+            //move backward
+            orientation = "backward";
+          }else if(id == "button-right-shoulder-bottom"){
+            //move forward
+            orientation = "forward";
+          }
+          socket.emit('move', orientation);
         }
       } else {
+        if(method ==2){
+        if(id == "button-1"){
+          gasPressed = false;
+        }else if(id == "button-1"){
+          breakPressed = false;
+        }
+      }
         buttonEl.classList.remove('pressed');
       }
     }
@@ -121,9 +172,15 @@ var tester = {
    * Update a given analogue stick on the screen.
    */
   updateAxis: function(value, gamepadId, labelId, stickId, horizontal) {
-  if(stickId == "stick-2"){
-      this.sendPos(value, horizontal);
-    }
+  if(method == 0){  
+      if(stickId == "stick-2" || stickId == "stick-1"){
+          this.sendPos(value, horizontal);
+      }
+  }else if(method == 1 || method == 2){
+      if(stickId == "stick-1"){
+          this.sendRightOrLeft(value, horizontal);
+      }
+  }
 
     var gamepadEl = document.querySelector('#gamepad-' + gamepadId);
 
@@ -166,6 +223,22 @@ var tester = {
 
         this.move(nextStep);
       }
+  },
+
+  sendRightOrLeft: function(value, horizontal){
+    if(gasPressed || breakPressed){
+      if(value>0.75 || value<-0.75){
+        if(horizontal){
+          if(value > 0){
+            //move right
+            socket.emit('move', "right");
+          }else{
+            //move left
+            socket.emit('move', "left");
+          }
+        }
+      }
+    }
   },
 
   move: function(step){
