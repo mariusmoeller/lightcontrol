@@ -74,9 +74,7 @@ require("fs").readdirSync("./src/devices").forEach(function(file) {
   Devices[file.substr(0, file.length-3)] = require("./src/devices/" + file);
 });
 
-console.log(Devices);
-
-// Set up configures devices
+// Set up configured devices
 var devices = nconf.get('devices');
 _(devices).forEach(function(device, i) {
     devices[i] = new Devices[device.type](device, artnetClient);
@@ -109,7 +107,6 @@ socketio.listen(server).on('connection', function(socket) {
         // devices[0].setPos(data[2], data[0]);
 
         devices[0].setPosByDegrees(360 - data['alpha'], data['beta'] + 90)
-
 
         if (record)
             show.addData(1, data);
