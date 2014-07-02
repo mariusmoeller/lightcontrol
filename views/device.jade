@@ -1,0 +1,10 @@
+extends layout
+
+block content
+    h3= devices[id].conf.name
+    .row.top-space
+      .col-md-12
+        div(data-device-id= id)#colors
+    .row.top-space
+      .col-md-12
+        div#btn-send-position.btn.btn-default.btn-lg.btn-block Move

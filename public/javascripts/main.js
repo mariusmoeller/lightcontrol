@@ -33,9 +33,7 @@ window.onload = function() {
 
 	$('#colors').minicolors({
 		change: function(hex, opacity) {
-			// TODO: send proper light id
-			socket.emit('color', hex, 0);
-			//console.log(hex + ' - ' + opacity);
+			socket.emit('color', hex, $(this).data("device-id"));
 		}
 	});
 
@@ -51,9 +49,9 @@ window.onload = function() {
 
 			startColor = color;
 
-			//console.log(color);		
+			//console.log(color);
 			//timeProgression();
-			
+
 		}
 	});
 
@@ -66,12 +64,12 @@ window.onload = function() {
 
 	$('#colorsEnd').minicolors({
 		change: function(hex, opacity) {
-			
+
 
 			// hex zu HSL
 
 			var color = hexToHsl(hex);
-			
+
 			endColor = color;
 
 
@@ -79,7 +77,7 @@ window.onload = function() {
 			console.log(color);
 			console.log(color2);*/
 
-			//timeProgression();			
+			//timeProgression();
 
 
 
@@ -90,7 +88,7 @@ window.onload = function() {
 
 	$('#colorsEnd').minicolors();
 
-		
+
 
 	$('#btn-send-position').click(function() {
 		if ($('#btn-send-position').hasClass('btn-success'))
