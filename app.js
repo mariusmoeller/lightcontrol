@@ -51,7 +51,12 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-app.get('/', routes.index);
+// app.get('/', routes.index);
+app.get('/', function(req, res) {
+    res.render('index', { title: 'LightControl', devices: devices })
+    console.log(devices);
+});
+
 app.get('/users', user.list);
 app.get('/shows', showRoute.list);
 app.get('/pong', pongRoute.list);
@@ -62,6 +67,11 @@ app.get('/timer', timerRoute.list);
 app.get('/conf', function(req, res) {res.render('conf')});
 app.get('/draw', function(req, res) {res.render('draw')});
 
+// API
+app.get('/devices', function(req, res) {
+    res.json(nconf.get('devices'));
+});
+
 var server = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
@@ -70,18 +80,16 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 var Artnet = require('./src/ArtnetClient');
 var artnetClient = new Artnet(nconf.get('address'), nconf.get('port'));
 
-// Set up lights
-var Light = require('./src/Light');
-var MovingHead = require('./src/MovingHead');
+// Load device classes
+var Devices = {};
+require("fs").readdirSync("./src/devices").forEach(function(file) {
+  Devices[file.substr(0, file.length-3)] = require("./src/devices/" + file);
+});
 
-// TODO: It might be better to change hierarchy to:
-// device {id: X, type: X} so that each light, moving head etc has a unique id
-// object creation depending on type a la new DeviceType(conf, artnetClient)
-
+// Set up configured devices
 var devices = nconf.get('devices');
 _(devices).forEach(function(device, i) {
-    // TODO: Allow different devices, not only moving heads
-    devices[i] = new MovingHead(device, artnetClient);
+    devices[i] = new Devices[device.type](device, artnetClient);
 });
 
 // Misc
@@ -105,11 +113,12 @@ socketio.listen(server).on('connection', function(socket) {
 
     socket.on('movement', function(data, id) {
 
-        data = sanitize.movement(data);
-        // TODO: is Z and X swapped? pan should be z and tilt x?
-        devices[0].setPos(data[2], data[0]);
-
         debug('movement data send to artnet client, data: ' + data);
+
+        // data = sanitize.movement(data);
+        // devices[0].setPos(data[2], data[0]);
+
+        devices[0].setPosByDegrees(360 - data['alpha'], data['beta'] + 90)
 
         if (record)
             show.addData(1, data);
