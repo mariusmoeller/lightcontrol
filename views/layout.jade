@@ -37,9 +37,9 @@ html
         // Collect the nav links, forms, and other content for toggling
         #bs-example-navbar-collapse-1.collapse.navbar-collapse
           ul.nav.navbar-nav
-            each device in devices
+            each device, id in devices
               li.active
-                a(href='#')= device.conf.name
+                a(href='/devices/' + id)= device.conf.name
             li.dropdown
               a.dropdown-toggle(href='#', data-toggle='dropdown')
                 | Washs

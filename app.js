@@ -57,6 +57,9 @@ if ('development' == app.get('env')) {
 }
 
 app.get('/', routes.index);
+app.get('/devices/:id', function(req, res) {
+    res.render('device', {id: req.params.id});
+})
 app.get('/users', user.list);
 app.get('/shows', showRoute.list);
 app.get('/pong', pongRoute.list);
@@ -67,7 +70,7 @@ app.get('/conf', function(req, res) {res.render('conf')});
 app.get('/draw', function(req, res) {res.render('draw')});
 
 // API
-app.get('/devices', function(req, res) {
+app.get('/api/devices', function(req, res) {
     res.json(nconf.get('devices'));
 });
 

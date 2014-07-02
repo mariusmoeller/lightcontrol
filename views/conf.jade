@@ -9,5 +9,22 @@ block content
     .row
       .col-md-12
         h3= device.conf.name
+        each value, index in device.conf
+          if typeof value === 'object'
+            p= index
+            each val, key in value
+              p= key + ': ' + val
+          else
+            p= index + ': ' + value
 
+
+  //- mixin parseObject(devices)
+  //-
+  //-   mixin parseObject(obj)
+  //-     div
+  //-       each val, key in obj
+  //-         if typeof val === 'string'
+  //-           span #{val}
+  //-         else if typeof val === 'object'
+  //-           mixin parseObject(val)
   script(src='/javascripts/conf.js')
