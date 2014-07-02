@@ -104,7 +104,6 @@ socketio.listen(server).on('connection', function(socket) {
     })
 
     socket.on('movement', function(data, id) {
-
         data = sanitize.movement(data);
         // TODO: is Z and X swapped? pan should be z and tilt x?
         devices[0].setPos(data[2], data[0]);
@@ -115,10 +114,8 @@ socketio.listen(server).on('connection', function(socket) {
             show.addData(1, data);
     });
 
-    socket.on('move', function(step) {
-        var id = 0;
-        devices[id].makeStep(step);
-        debug('movement data send to artnet client, direction: ' + step);
+    socket.on('move', function(data, id) {
+        devices[id].move(data.z, data.x);
     });
 
     socket.on('color', function(hexColor, id) {

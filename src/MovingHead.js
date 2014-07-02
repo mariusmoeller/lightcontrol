@@ -39,36 +39,19 @@ MovingHead.prototype.move = function(x, z) {
     this.x += x;
     this.z += z;
 
-    var data = {};
-    data[this.conf.pan.channel] = this.x;
-    data[this.conf.tilt.channel] = this.z;
-    console.log("x: "+this.x+" y: "+this.y);
-
-    this.artnet.send(data);
-}
-
-MovingHead.prototype.makeStep = function(direction) {
-    switch(direction){
-        case "forward":  this.z--;;break;
-        case "backward": this.z++;break;
-        case "left":     this.x--;break;
-        case "right":    this.x++;break;
-    }
-
-    if(this.z > 255){
-        this.z = 255;
-    }else if(this.z < 0){
-        this.z = 0;
-    }else if(this.x > 255){
-        this.x = 255;
-    }else if(this.x < 0){
+    if(this.x<0)
         this.x = 0;
-    }
+    else if(this.x>255)
+        this.x = 255;
+    else if(this.z<0)
+        this.z = 0;
+    else if(this.z>255)
+        this.z = 255;
 
     var data = {};
     data[this.conf.pan.channel] = this.x;
     data[this.conf.tilt.channel] = this.z;
-    console.log("x: "+this.x+" y: "+this.z);
+    //console.log("x: "+this.x+" z: "+this.z);
 
     this.artnet.send(data);
 }

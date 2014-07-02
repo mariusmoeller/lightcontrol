@@ -16,11 +16,8 @@
  *
  * @author mwichary@google.com (Marcin Wichary)
  */
-var lastId = 1000;
-var nextStep = {x:null, y:null};
 var socket = io.connect();
 var method = 0;
-
 $('#methodList').change(function(){ 
       method = $("#methodList")[0].selectedIndex ;
 })
@@ -83,12 +80,6 @@ var tester = {
         }
       }
     }
-
- /*   if (padsConnected) {
-      document.querySelector('#no-gamepads-connected').classList.remove('visible');
-    } else {
-     //document.querySelector('#no-gamepads-connected').classList.add('visible');
-    }*/
   },
 
   /**
@@ -131,23 +122,11 @@ var tester = {
     }
 
     if (buttonEl) { // Extraneous buttons have just a label.
+      var buttonId = id.substring(id.length-1);
       if (pressed) {
         buttonEl.classList.add('pressed');
-        var buttonId = id.substring(id.length-1);
         if(buttonId >= 1 && buttonId <= 4){
-          if(method == 0)
-            this.buttonPressed(buttonId);
-          if(method == 2){
-            var orientation = "";
-            if(buttonId == 1){
-              orientation = "forward";
-              gasPressed = true;
-            }else if(buttonId == 3){
-              orientation = "backward";
-              breakPressed = true;
-            }
-            socket.emit('move', orientation);
-          }
+          this.buttonPressed(buttonId);
         }
         if(buttonId == "m" && method == 1){
           var orientation = "";
@@ -158,13 +137,13 @@ var tester = {
             //move forward
             orientation = "forward";
           }
-          socket.emit('move', orientation);
+         this.sendOrientation(orientation);
         }
       } else {
         if(method ==2){
-        if(id == "button-1"){
+        if(buttonId == 1){
           gasPressed = false;
-        }else if(id == "button-1"){
+        }else if(buttonId == 2){
           breakPressed = false;
         }
       }
@@ -177,16 +156,11 @@ var tester = {
    * Update a given analogue stick on the screen.
    */
   updateAxis: function(value, gamepadId, labelId, stickId, horizontal) {
-  if(method == 0){  
+  if(method >= 0 && method <= 2){  
       if(stickId == "stick-2" || stickId == "stick-1"){
           this.sendPos(value, horizontal);
       }
-  }else if(method == 1 || method == 2){
-      if(stickId == "stick-1"){
-          this.sendRightOrLeft(value, horizontal);
-      }
   }
-
     var gamepadEl = document.querySelector('#gamepad-' + gamepadId);
 
     // Update the stick visually.
@@ -204,17 +178,18 @@ var tester = {
   },
 
   buttonPressed: function(id) {
-    var orientation = [];
-    switch(id){
-      case "1": orientation = "backward"; break; //move down
-      case "2": orientation = "right"; break; //move right
-      case "3": orientation = "left"; break; //move left
-      case "4": orientation = "forward"; break; //move up
-    }
-    socket.emit('move', orientation);
+    var orientations = [
+                  ["backward", "right", "left", "forward"], //method 0
+                  [],                                                                     //method 1
+                  ["forward", "backward", 0, 0]                   //method 2
+      ];
+      var o = orientations[method][id-1];
+      if(o)
+          this.sendOrientation(o);
   },
 
   sendPos: function(value, horizontal){
+    var nextStep = {};
     if(value>0.75 || value<-0.75){
         if(horizontal){
           //x
@@ -225,25 +200,19 @@ var tester = {
           nextStep.y = value;
           nextStep.x = 0;
         }
-
         this.move(nextStep);
       }
   },
 
-  sendRightOrLeft: function(value, horizontal){
-    if(gasPressed || breakPressed){
-      if(value>0.75 || value<-0.75){
-        if(horizontal){
-          if(value > 0){
-            //move right
-            socket.emit('move', "right");
-          }else{
-            //move left
-            socket.emit('move', "left");
-          }
-        }
-      }
+  sendOrientation:function(direction){
+    var data = {x: 0, z:0};
+    switch(direction){
+      case "forward" :  data.x = 1;if(method>0) gasPressed=true; break;
+      case "backward" : data.x = -1; if(method>0) breakPressed=true;break;
+      case "right" : data.z = 1;break;
+      case "left" : data.z = -1;break;
     }
+    socket.emit('move', data, 0);
   },
 
   move: function(step){
@@ -279,6 +248,6 @@ var tester = {
         }
       }
     }
-    socket.emit('move', orientation);
+    this.sendOrientation(orientation);
   }
 };
