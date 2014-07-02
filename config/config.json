@@ -4,6 +4,7 @@
   "devices": {
     "0": {
       "type": "MovingHead",
+      "name": "Vizi Wash",
       "r": {
         "channel": 4
       },

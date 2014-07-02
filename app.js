@@ -50,7 +50,12 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-app.get('/', routes.index);
+// app.get('/', routes.index);
+app.get('/', function(req, res) {
+    res.render('index', { title: 'LightControl', devices: devices })
+    console.log(devices);
+});
+
 app.get('/users', user.list);
 app.get('/shows', showRoute.list);
 app.get('/pong', pongRoute.list);
@@ -59,6 +64,11 @@ app.get('/controller', controllerRoute.list);
 
 app.get('/conf', function(req, res) {res.render('conf')});
 app.get('/draw', function(req, res) {res.render('draw')});
+
+// API
+app.get('/devices', function(req, res) {
+    res.json(nconf.get('devices'));
+});
 
 var server = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
