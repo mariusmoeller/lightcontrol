@@ -11,6 +11,8 @@ for (var i = 0; i < 512; i++) {
 
                 data[channel] = value;
 
+                console.log(data);
+
                 var socket = io.connect();
                 socket.emit('direct', data);
             }
