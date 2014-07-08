@@ -21,6 +21,31 @@ block content
           input#coordinatesInput.form-control(type='text', placeholder='Enter coordinates')
           span.input-group-btn
               button#coordinates.btn.btn-default(type='button') Go!
+  div#labyrinthOptions
+    .row.top-space
+     form(role='form')
+      .col-lg-2
+        .form-group
+          label(for='distance') Distance
+          input#distance.form-control(type='text', placeholder='Enter Distance in cm', value='450')
+      .col-lg-2
+        .form-group
+          label(for='washHeight') Wash Height
+          input#washHeight.form-control(type='text', placeholder='Enter  Height of Wash in cm', value='78')
+      .col-lg-2
+        .form-group
+          label(for='projectorHeight') Projector Height
+          input#projectorHeight.form-control(type='text', placeholder='Enter Height of Projector in cm', value ='112')
+      .col-lg-2
+        .form-group
+          label(for='screenWidth') Screen Width
+          input#screenWidth.form-control(type='text', placeholder='Enter Width of Screen in cm', value='215')
+      .col-lg-2
+        .form-group
+          label(for='screenHeight') Screen Height
+          input#screenHeight.form-control(type='text', placeholder='Enter Height of Screen in cm', value='155')
+      .col-lg-2
+        button#labConfDone.btn.btn-default(type='button') Done
   ul#gamepads
    li.template
     .buttons

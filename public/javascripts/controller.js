@@ -20,13 +20,25 @@
 $('#methodList').change(function(){ 
       controller.method = $("#methodList")[0].selectedIndex ;
       if(controller.method == 3){
-          lab.currentY = (lab.screenWidth / 2) * (-1) + 5;
-          lab.currentZ = lab.projectorHeight - lab.washHeight + lab.screenHeight;
-          var coordinates = {x : lab.distance, y: lab.currentY, z: lab.currentZ};
-          var co2d = controller.transform3D(coordinates);
-          controller.socket.emit('setPosByDegrees', co2d, 0);
+        $('#labyrinthOptions').show();
       }
 });
+$('#labConfDone').click(function(){
+  lab.distance = parseInt($('#distance').val());
+  lab.washHeight = parseInt($('#washHeight').val());
+  lab.projectorHeight = parseInt($('#projectorHeight').val());
+  lab.screenHeight = parseInt($('#screenHeight').val());
+  lab.screenWidth = parseInt($('#screenWidth').val());
+
+  $('#labyrinthOptions').hide();
+
+  lab.currentY = (lab.screenWidth / 2) * (-1) + 5;
+  lab.currentZ = lab.projectorHeight - lab.washHeight + lab.screenHeight;
+  var coordinates = {x : lab.distance, y: lab.currentY, z: lab.currentZ};
+  var co2d = controller.transform3D(coordinates);
+  controller.socket.emit('setPosByDegrees', co2d, 0);
+});
+
 $('#coordinates').click(function(){
     var i = $('#coordinatesInput').val();
     var coordinates = i.split(" ");
@@ -37,11 +49,11 @@ $('#coordinates').click(function(){
 });
 
 var lab = {
-  washHeight : 78,
-  projectorHeight: 112,
-  screenHeight : 155,
-  screenWidth: 215,
-  distance : 450,
+  washHeight : 0,
+  projectorHeight: 0,
+  screenHeight : 0,
+  screenWidth: 0,
+  distance : 0,
   currentY : 0,
   currentZ : 0
 };

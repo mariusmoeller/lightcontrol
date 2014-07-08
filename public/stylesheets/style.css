@@ -50,3 +50,7 @@ input[type=range] {
     width: 30px !important;
     height: 200px;
 }
+
+#labyrinthOptions {
+    display: none;
+}
