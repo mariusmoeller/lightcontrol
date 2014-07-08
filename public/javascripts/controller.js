@@ -16,15 +16,22 @@
  *
  * @author mwichary@google.com (Marcin Wichary)
  */
-var socket = io.connect();
-var method = 0;
+//var socket = io.connect();
 $('#methodList').change(function(){ 
-      method = $("#methodList")[0].selectedIndex ;
+      controller.method = $("#methodList")[0].selectedIndex ;
+});
+$('#coordinates').click(function(){
+    var i = $('#coordinatesInput').val();
+    var coordinates = i.split(" ");
+    for(var i=0;i<coordinates.length;i++){
+      coordinates[i] = parseInt(coordinates[i]);
+    }
+    controller.showPos(coordinates);
 })
 
-var gasPressed = false;
-var breakPressed = false;
-var tester = {
+//var gasPressed = false;
+//var breakPressed = false;
+var controller = {
   // If the number exceeds this in any way, we treat the label as active
   // and highlight it.
   VISIBLE_THRESHOLD: 0.1,
@@ -35,51 +42,31 @@ var tester = {
   // How â€œdeepâ€ does an analogue button need to be depressed to consider it
   // a button down.
   ANALOGUE_BUTTON_THRESHOLD: .5,
-  init: function() {
-    //tester.updateMode();
-    tester.updateGamepads();
-    // this.socket = socketio.connect();
-  },
 
-  /**
-   * Tell the user the browser doesnâ€™t support Gamepad API.
-   */
-  showNotSupported: function() {
-    document.querySelector('#no-gamepad-support').classList.add('visible');
+  gasPressed: false,
+  breakPressed: false,
+  method: 0,
+  socket: io.connect(),
+  init: function() {
+    this.updateGamepads();
   },
 
   /**
    * Update the gamepads on the screen, creating new elements from the
    * template.
    */
-  updateGamepads: function(gamepads) {
-    var els = document.querySelectorAll('#gamepads > :not(.template)');
-    for (var i = 0, el; el = els[i]; i++) {
-      el.parentNode.removeChild(el);
-    }
+  updateGamepads: function() {
+    var el = document.createElement('li');
 
-    var padsConnected = false;
+    // Copy from the template.
+    el.innerHTML =
+        document.querySelector('#gamepads > .template').innerHTML;
 
-    if (gamepads) {
-      for (var i in gamepads) {
-        var gamepad = gamepads[i];
+    el.id = 'gamepad-0';
+    el.querySelector('.name').innerHTML =  "Lightcontrol IMI 2014"; //gamepad.id ||
+    el.querySelector('.index').innerHTML = 0; //gamepad.iid
 
-        if (gamepad) {
-          var el = document.createElement('li');
-
-          // Copy from the template.
-          el.innerHTML =
-              document.querySelector('#gamepads > .template').innerHTML;
-
-          el.id = 'gamepad-' + i;
-          el.querySelector('.name').innerHTML = gamepad.id;
-          el.querySelector('.index').innerHTML = gamepad.index;
-
-          document.querySelector('#gamepads').appendChild(el);
-          padsConnected = true;
-        }
-      }
-    }
+    document.querySelector('#gamepads').appendChild(el);
   },
 
   /**
@@ -98,54 +85,34 @@ var tester = {
       pressed = button.pressed;
     } else {
       value = button;
-      pressed = button > tester.ANALOGUE_BUTTON_THRESHOLD;
+      pressed = button > this.ANALOGUE_BUTTON_THRESHOLD;
     }
 
     // Update the button visually.
     var buttonEl = gamepadEl.querySelector('[name="' + id + '"]');
     var bId = id.substring(id.length-1);
-    
-    if(method == 1){
-      if(id == "button-right-shoulder-bottom"){
-        if(buttonEl.classList[1]){
-          gasPressed = true;
-        }else{
-          gasPressed = false;
-        }
-      }else if(id == "button-left-shoulder-bottom"){
-        if(buttonEl.classList[1]){
-          breakPressed = true;
-        }else{
-          breakPressed = false;
-        }
-      }
-    }
-
     if (buttonEl) { // Extraneous buttons have just a label.
-      var buttonId = id.substring(id.length-1);
       if (pressed) {
         buttonEl.classList.add('pressed');
-        if(buttonId >= 1 && buttonId <= 4){
-          this.buttonPressed(buttonId);
+        if(bId >= 1 && bId <= 4){
+          this.buttonPressed(bId);
         }
-        if(buttonId == "m" && method == 1){
+        if(bId == "m" && this.method == 1){
           var orientation = "";
           if(id == "button-left-shoulder-bottom"){
-            //move backward
             orientation = "backward";
           }else if(id == "button-right-shoulder-bottom"){
-            //move forward
             orientation = "forward";
           }
          this.sendOrientation(orientation);
         }
       } else {
-        if(method ==2){
-        if(buttonId == 1){
-          gasPressed = false;
-        }else if(buttonId == 2){
-          breakPressed = false;
-        }
+        if(this.method ==2){
+          if(bId == 1){
+            this.gasPressed = false;
+          }else if(bId == 2){
+            this.breakPressed = false;
+          }
       }
         buttonEl.classList.remove('pressed');
       }
@@ -156,7 +123,7 @@ var tester = {
    * Update a given analogue stick on the screen.
    */
   updateAxis: function(value, gamepadId, labelId, stickId, horizontal) {
-  if(method >= 0 && method <= 2){  
+  if(this.method >= 0 && this.method <= 2){  
       if(stickId == "stick-2" || stickId == "stick-1"){
           this.sendPos(value, horizontal);
       }
@@ -167,7 +134,7 @@ var tester = {
 
     var stickEl = gamepadEl.querySelector('[name="' + stickId + '"]');
     if (stickEl) { // Extraneous sticks have just a label.
-      var offsetVal = value * tester.STICK_OFFSET;
+      var offsetVal = value * this.STICK_OFFSET;
 
       if (horizontal) {
         stickEl.style.marginLeft = offsetVal + 'px';
@@ -183,22 +150,20 @@ var tester = {
                   [],                                                                     //method 1
                   ["forward", "backward", 0, 0]                   //method 2
       ];
-      var o = orientations[method][id-1];
+      var o = orientations[this.method][id-1];
       if(o)
           this.sendOrientation(o);
   },
 
   sendPos: function(value, horizontal){
-    var nextStep = {};
+    var nextStep = {x:0, y:0};
     if(value>0.75 || value<-0.75){
         if(horizontal){
           //x
           nextStep.x = value;
-          nextStep.y = 0;
         }else{
           //y
           nextStep.y = value;
-          nextStep.x = 0;
         }
         this.move(nextStep);
       }
@@ -207,12 +172,12 @@ var tester = {
   sendOrientation:function(direction){
     var data = {x: 0, z:0};
     switch(direction){
-      case "forward" :  data.x = 1;if(method>0) gasPressed=true; break;
-      case "backward" : data.x = -1; if(method>0) breakPressed=true;break;
+      case "forward" :  data.x = -1;if(this.method>0) this.gasPressed=true; break;
+      case "backward" : data.x = 1; if(this.method>0) this.breakPressed=true;break;
       case "right" : data.z = 1;break;
       case "left" : data.z = -1;break;
     }
-    socket.emit('move', data, 0);
+    this.socket.emit('move', data, 0);
   },
 
   move: function(step){
@@ -249,5 +214,35 @@ var tester = {
       }
     }
     this.sendOrientation(orientation);
+  },
+
+showPos:function(coordinates){
+            var x = coordinates[0];
+            var y = coordinates[1];
+            var z = coordinates[2];
+            var cX = 0;
+            var cY = 1;
+            var cZ = 0;
+            var betragFuerAlpha = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+            var skalarAlpha = cY * y + cX * x;
+            var alpha = Math.acos(skalarAlpha / betragFuerAlpha);
+            alpha /= Math.PI;
+            alpha *= 180;
+            if (x > 0)
+            {
+                alpha -= 180;
+                alpha *= -1;
+                alpha += 180;
+            }
+            //Beta
+            var distanceToMid = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+            var beta = Math.atan(z / distanceToMid);
+            beta /= Math.PI;
+            beta *= 180;
+            beta += 25;
+
+            var data = [alpha, beta];
+            console.log(data);
+           this.socket.emit('setPosByDegrees', data, 0);
   }
 };

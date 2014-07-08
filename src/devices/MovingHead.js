@@ -55,32 +55,6 @@ MovingHead.prototype.move = function(pan, tilt) {
     this.setPos(this.pan, this.tilt);
 }
 
-MovingHead.prototype.makeStep = function(direction) {
-    switch(direction){
-        case "forward":  this.z--;;break;
-        case "backward": this.z++;break;
-        case "left":     this.x--;break;
-        case "right":    this.x++;break;
-    }
-
-    if(this.z > 255){
-        this.z = 255;
-    }else if(this.z < 0){
-        this.z = 0;
-    }else if(this.x > 255){
-        this.x = 255;
-    }else if(this.x < 0){
-        this.x = 0;
-    }
-
-    var data = {};
-    data[this.conf.tilt.channel] = this.x;
-    data[this.conf.pan.channel] = this.z;
-    console.log("x: "+this.x+" y: "+this.z);
-
-    this.artnet.send(data);
-}
-
 MovingHead.prototype.setPosDelayed = function(pan, tilt, delay) {
     var i = 0;
 
