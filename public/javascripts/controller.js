@@ -30,6 +30,11 @@ $('#labConfDone').click(function(){
   lab.screenHeight = parseInt($('#screenHeight').val());
   lab.screenWidth = parseInt($('#screenWidth').val());
 
+  lab.zMax = lab.projectorHeight - lab.washHeight + lab.screenHeight;
+  lab.zMin = lab.projectorHeight - lab.washHeight;
+  lab.yMax = lab.screenWidth / 2;
+  lab.yMin = (-1) * lab.screenWidth / 2;
+
   $('#labyrinthOptions').hide();
 
   lab.currentY = (lab.screenWidth / 2) * (-1) + 5;
@@ -37,6 +42,8 @@ $('#labConfDone').click(function(){
   var coordinates = {x : lab.distance, y: lab.currentY, z: lab.currentZ};
   var co2d = controller.transform3D(coordinates);
   controller.socket.emit('setPosByDegrees', co2d, 0);
+
+  controller.socket.emit('color', '#00ff00', 0);
 });
 
 $('#coordinates').click(function(){
@@ -55,7 +62,11 @@ var lab = {
   screenWidth: 0,
   distance : 0,
   currentY : 0,
-  currentZ : 0
+  currentZ : 0,
+  yMax : 0,
+  yMin:0,
+  zMax : 0,
+  zMin : 0
 };
 
 //var gasPressed = false;
@@ -228,7 +239,13 @@ var controller = {
     var coordinates = {x : lab.distance, y: lab.currentY, z: lab.currentZ};
     var co2d = controller.transform3D(coordinates);
     controller.socket.emit('setPosByDegrees', co2d, 0);
+
+    if(lab.currentZ > lab.zMax || lab.currentZ < lab.zMin || lab.currentY > lab.yMax || lab.currentY < lab.yMin)
+      controller.socket.emit('color', '#ff0000', 0);
+    else
+      controller.socket.emit('color', '#00ff00', 0);
   },
+
 
   move: function(step){
     var x = step.x;
