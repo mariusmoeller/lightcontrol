@@ -19,6 +19,8 @@
 $('#methodList').change(function(){ 
   helper.method = $("#methodList")[0].selectedIndex ;
   if(helper.method >= 3){
+
+    $('.collapse').collapse();
     $('#labyrinthOptions').show();
     if(helper.method == 4)
       obstacles.init();
@@ -26,8 +28,8 @@ $('#methodList').change(function(){
 });
 
 $('#labConfDone').click(function(){
-  labyrinth.init();
-  $('#labyrinthOptions').hide();
+      labyrinth.init();
+      $('.collapse').collapse('hide');
 });
 
 $('#coordinates').click(function(){

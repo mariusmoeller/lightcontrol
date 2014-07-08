@@ -651,3 +651,17 @@ body.iframe #no-gamepads-connected,
 body.iframe #no-gamepad-support {
   padding: 400px 50px 0 50px;
 }
+
+.panel{
+  background-color: #363A3F !important;
+}
+
+#labConfDone,
+.panel-title {
+  display: inline-block;
+}
+
+#labConfDone {
+  position: relative;
+  left: 50%;
+}

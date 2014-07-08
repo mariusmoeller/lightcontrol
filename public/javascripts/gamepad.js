@@ -54,7 +54,6 @@ var gamepadSupport = {
     if (!gamepadSupportAvailable) {
       // It doesnâ€™t seem Gamepad API is available â€“ show a message telling
       // the visitor about it.
-      controller.showNotSupported();
     } else {
       // Check and see if gamepadconnected/gamepaddisconnected is supported.
       // If so, listen for those events and don't start polling until a gamepad
