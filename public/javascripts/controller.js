@@ -19,6 +19,13 @@
 //var socket = io.connect();
 $('#methodList').change(function(){ 
       controller.method = $("#methodList")[0].selectedIndex ;
+      if(controller.method == 3){
+          lab.currentY = (lab.screenWidth / 2) * (-1) + 5;
+          lab.currentZ = lab.projectorHeight - lab.washHeight + lab.screenHeight;
+          var coordinates = {x : lab.distance, y: lab.currentY, z: lab.currentZ};
+          var co2d = controller.transform3D(coordinates);
+          controller.socket.emit('setPosByDegrees', co2d, 0);
+      }
 });
 $('#coordinates').click(function(){
     var i = $('#coordinatesInput').val();
@@ -27,7 +34,17 @@ $('#coordinates').click(function(){
       coordinates[i] = parseInt(coordinates[i]);
     }
     controller.showPos(coordinates);
-})
+});
+
+var lab = {
+  washHeight : 78,
+  projectorHeight: 112,
+  screenHeight : 155,
+  screenWidth: 215,
+  distance : 450,
+  currentY : 0,
+  currentZ : 0
+};
 
 //var gasPressed = false;
 //var breakPressed = false;
@@ -146,13 +163,18 @@ var controller = {
 
   buttonPressed: function(id) {
     var orientations = [
+                  // A    B   X   Y
                   ["backward", "right", "left", "forward"], //method 0
                   [],                                                                     //method 1
-                  ["forward", "backward", 0, 0]                   //method 2
+                  ["forward", "backward", 0, 0],                   //method 2
+                  ["backward", "right", "left", "forward"]    //method 3 -- labyrinth
       ];
       var o = orientations[this.method][id-1];
       if(o)
-          this.sendOrientation(o);
+          if(this.method < 3)
+           this.sendOrientation(o);
+          else
+            this.labyrinth(o);
   },
 
   sendPos: function(value, horizontal){
@@ -178,6 +200,22 @@ var controller = {
       case "left" : data.z = -1;break;
     }
     this.socket.emit('move', data, 0);
+  },
+
+  labyrinth: function(direction){
+    var data = {y: 0, z:0};
+    switch(direction){
+      case "forward" :  data.z = 1; break;
+      case "backward" : data.z = -1;break;
+      case "right" : data.y = 1;break;
+      case "left" : data.y = -1;break;
+    }
+    lab.currentZ += data.z;
+    lab.currentY += data.y;
+
+    var coordinates = {x : lab.distance, y: lab.currentY, z: lab.currentZ};
+    var co2d = controller.transform3D(coordinates);
+    controller.socket.emit('setPosByDegrees', co2d, 0);
   },
 
   move: function(step){
@@ -216,7 +254,37 @@ var controller = {
     this.sendOrientation(orientation);
   },
 
+  transform3D:function(coordinates){
+            var x = coordinates.x;
+            var y = coordinates.y;
+            var z = coordinates.z;
+            var cX = 0;
+            var cY = 1;
+            var cZ = 0;
+            var betragFuerAlpha = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+            var skalarAlpha = cY * y + cX * x;
+            var alpha = Math.acos(skalarAlpha / betragFuerAlpha);
+            alpha /= Math.PI;
+            alpha *= 180;
+            if (x > 0)
+            {
+                alpha -= 180;
+                alpha *= -1;
+                alpha += 180;
+            }
+            //Beta
+            var distanceToMid = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+            var beta = Math.atan(z / distanceToMid);
+            beta /= Math.PI;
+            beta *= 180;
+            beta += 25;
+
+            var data = [alpha, beta];
+            return data;
+       },
+
 showPos:function(coordinates){
+    if(coordinates.length == 3){
             var x = coordinates[0];
             var y = coordinates[1];
             var z = coordinates[2];
@@ -244,5 +312,9 @@ showPos:function(coordinates){
             var data = [alpha, beta];
             console.log(data);
            this.socket.emit('setPosByDegrees', data, 0);
-  }
+         }else if(coordinates.length == 2){
+
+            this.socket.emit('setPos', coordinates, 0);
+         }
+       }
 };

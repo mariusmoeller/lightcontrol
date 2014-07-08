@@ -125,7 +125,11 @@ socketio.listen(server).on('connection', function(socket) {
 
     socket.on('move', function(data, id) {
         devices[id].move(data.z, data.x);
-    });
+    })
+
+    socket.on('setPos', function(data, id) {
+        devices[id].setPos(data[0], data[1]);
+    })
 
     socket.on('color', function(hexColor, id) {
         debug('Recieved color data: ' + hexColor);
