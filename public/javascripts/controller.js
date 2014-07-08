@@ -19,8 +19,10 @@
 //var socket = io.connect();
 $('#methodList').change(function(){ 
       controller.method = $("#methodList")[0].selectedIndex ;
-      if(controller.method == 3){
+      if(controller.method > 3){
         $('#labyrinthOptions').show();
+        if(controller.method == 4)
+            obstacles.createObstaclePositions();
       }
 });
 $('#labConfDone').click(function(){
@@ -32,12 +34,12 @@ $('#labConfDone').click(function(){
 
   lab.zMax = lab.projectorHeight - lab.washHeight + lab.screenHeight;
   lab.zMin = lab.projectorHeight - lab.washHeight;
-  lab.yMax = lab.screenWidth / 2;
-  lab.yMin = (-1) * lab.screenWidth / 2;
+  lab.yMax = Math.round(lab.screenWidth / 2);
+  lab.yMin = Math.round((-1) * lab.screenWidth / 2);
 
   $('#labyrinthOptions').hide();
 
-  lab.currentY = (lab.screenWidth / 2) * (-1) + 5;
+  lab.currentY = Math.round((lab.screenWidth / 2) * (-1) + 5);
   lab.currentZ = lab.projectorHeight - lab.washHeight + lab.screenHeight;
   var coordinates = {x : lab.distance, y: lab.currentY, z: lab.currentZ};
   var co2d = controller.transform3D(coordinates);
@@ -67,6 +69,43 @@ var lab = {
   yMin:0,
   zMax : 0,
   zMin : 0
+};
+
+var obstacles = {
+  positions : [],
+  createObstaclePositions : function() {
+    var yLeftBorder = -108;
+    var yRightBorder = 108;
+
+  /*  var zUpperBorder = 140;
+    var zLowerBorder = 86;*/
+
+    var zMax1 = 140;
+    var zMin1 = 136;
+
+    var zMax2 = 90;
+    var zMin2 = 86;
+
+    var yStop1 = 32;
+    var yStop2 = -34;
+
+    for(var y=yLeftBorder;y<yRightBorder;y++){
+      for(var z=zMax1;z>zMin2;z--){
+        var pos = [y, z];
+        if(z  >=zMin1 && z <= zMax1){
+          if(y < yStop1){
+            this.positions.push(pos);
+          }
+        }
+         if(z  >=zMin2 && z <= zMax2){
+          if(y > -yStop2){
+            this.positions.push(pos);
+          }
+        }
+      }
+    }
+    return this.positions;
+  }
 };
 
 //var gasPressed = false;
@@ -235,7 +274,7 @@ var controller = {
     }
     lab.currentZ += data.z;
     lab.currentY += data.y;
-
+    console.log(lab.currentZ);
     var coordinates = {x : lab.distance, y: lab.currentY, z: lab.currentZ};
     var co2d = controller.transform3D(coordinates);
     controller.socket.emit('setPosByDegrees', co2d, 0);
@@ -244,6 +283,13 @@ var controller = {
       controller.socket.emit('color', '#ff0000', 0);
     else
       controller.socket.emit('color', '#00ff00', 0);
+    if(this.method == 4){
+      for(var i=0;i<obstacles.positions.length;i++){
+        var p = obstacles.positions[i];
+        if(lab.currentY == p[0] && lab.currentZ == p[1])
+          controller.socket.emit('color', '#000ff', 0);
+      }
+    }
   },
 
 
