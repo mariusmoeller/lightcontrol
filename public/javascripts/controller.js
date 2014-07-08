@@ -16,48 +16,63 @@
  *
  * @author mwichary@google.com (Marcin Wichary)
  */
-//var socket = io.connect();
 $('#methodList').change(function(){ 
-      controller.method = $("#methodList")[0].selectedIndex ;
-      if(controller.method > 3){
-        $('#labyrinthOptions').show();
-        if(controller.method == 4)
-            obstacles.createObstaclePositions();
-      }
+  helper.method = $("#methodList")[0].selectedIndex ;
+  if(helper.method >= 3){
+    $('#labyrinthOptions').show();
+    if(helper.method == 4)
+      obstacles.init();
+  }
 });
+
 $('#labConfDone').click(function(){
-  lab.distance = parseInt($('#distance').val());
-  lab.washHeight = parseInt($('#washHeight').val());
-  lab.projectorHeight = parseInt($('#projectorHeight').val());
-  lab.screenHeight = parseInt($('#screenHeight').val());
-  lab.screenWidth = parseInt($('#screenWidth').val());
-
-  lab.zMax = lab.projectorHeight - lab.washHeight + lab.screenHeight;
-  lab.zMin = lab.projectorHeight - lab.washHeight;
-  lab.yMax = Math.round(lab.screenWidth / 2);
-  lab.yMin = Math.round((-1) * lab.screenWidth / 2);
-
+  labyrinth.init();
   $('#labyrinthOptions').hide();
-
-  lab.currentY = Math.round((lab.screenWidth / 2) * (-1) + 5);
-  lab.currentZ = lab.projectorHeight - lab.washHeight + lab.screenHeight;
-  var coordinates = {x : lab.distance, y: lab.currentY, z: lab.currentZ};
-  var co2d = controller.transform3D(coordinates);
-  controller.socket.emit('setPosByDegrees', co2d, 0);
-
-  controller.socket.emit('color', '#00ff00', 0);
 });
 
 $('#coordinates').click(function(){
-    var i = $('#coordinatesInput').val();
-    var coordinates = i.split(" ");
-    for(var i=0;i<coordinates.length;i++){
-      coordinates[i] = parseInt(coordinates[i]);
-    }
-    controller.showPos(coordinates);
+  var i = $('#coordinatesInput').val();
+  var coordinates = i.split(" ");
+  for(var i=0;i<coordinates.length;i++){
+    coordinates[i] = parseInt(coordinates[i]);
+  }
+  if(coordinates.length == 3)
+    helper.socket.emit('setPosByDegrees', helper.transform3D(coordinates[0], coordinates[1], coordinates[2]), 0);
+  else if(coordinates.length == 2)
+    helper.socket.emit('setPos', coordinates, 0);
 });
 
-var lab = {
+ var helper = {
+  socket: io.connect(),
+  method: 0,
+  transform3D: function(x, y, z){
+    //console.log("x: " + x + " y: " + y + " z: " + z);
+    var cX = 0;
+    var cY = 1;
+    var cZ = 0;
+    var betragFuerAlpha = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+    var skalarAlpha = cY * y + cX * x;
+    var alpha = Math.acos(skalarAlpha / betragFuerAlpha);
+    alpha /= Math.PI;
+    alpha *= 180;
+    if (x > 0){
+      alpha -= 180;
+      alpha *= -1;
+      alpha += 180;
+    }
+    //Beta
+    var distanceToMid = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+    var beta = Math.atan(z / distanceToMid);
+    beta /= Math.PI;
+    beta *= 180;
+    beta += 25;
+
+    var data = [alpha, beta];
+    return data;
+  }
+};
+
+var labyrinth = {
   washHeight : 0,
   projectorHeight: 0,
   screenHeight : 0,
@@ -68,17 +83,60 @@ var lab = {
   yMax : 0,
   yMin:0,
   zMax : 0,
-  zMin : 0
+  zMin : 0,
+
+  init: function(){
+    this.distance = parseInt($('#distance').val());
+    this.washHeight = parseInt($('#washHeight').val());
+    this.projectorHeight = parseInt($('#projectorHeight').val());
+    this.screenHeight = parseInt($('#screenHeight').val());
+    this.screenWidth = parseInt($('#screenWidth').val());
+
+    this.zMax = this.projectorHeight - this.washHeight + this.screenHeight;
+    this.zMin = this.projectorHeight - this.washHeight;
+    this.yMax = Math.round(this.screenWidth / 2);
+    this.yMin = Math.round((-1) * this.screenWidth / 2);
+
+    this.currentY = Math.round((this.screenWidth / 2) * (-1) + 5);
+    this.currentZ = this.projectorHeight - this.washHeight + this.screenHeight;
+
+    this.sendPosition();
+    helper.socket.emit('color', '#00ff00', 0);
+  },
+
+  move: function(direction){
+    switch(direction){
+      case "forward" :   this.currentZ++;  break;
+      case "backward" :  this.currentZ--; break;
+      case "right" : this.currentY++; break;
+      case "left" : this.currentY--; break;
+    }
+    this.sendPosition();
+
+    if(this.currentZ > this.zMax || this.currentZ < this.zMin || this.currentY > this.yMax || this.currentY < this.yMin)
+      helper.socket.emit('color', '#ff0000', 0); //red
+    else
+      helper.socket.emit('color', '#00ff00', 0); //green
+
+    if(helper.method == 4){
+      for(var i=0;i<obstacles.positions.length;i++){
+        var p = obstacles.positions[i];
+        if(this.currentY == p[0] && this.currentZ == p[1])
+          helper.socket.emit('color', '#000ff', 0);
+      }
+    }
+  },
+
+  sendPosition: function(){
+    helper.socket.emit('setPosByDegrees', helper.transform3D(this.distance, this.currentY, this.currentZ), 0);
+  }
 };
 
 var obstacles = {
   positions : [],
-  createObstaclePositions : function() {
+  init : function() {
     var yLeftBorder = -108;
     var yRightBorder = 108;
-
-  /*  var zUpperBorder = 140;
-    var zLowerBorder = 86;*/
 
     var zMax1 = 140;
     var zMin1 = 136;
@@ -92,24 +150,17 @@ var obstacles = {
     for(var y=yLeftBorder;y<yRightBorder;y++){
       for(var z=zMax1;z>zMin2;z--){
         var pos = [y, z];
-        if(z  >=zMin1 && z <= zMax1){
-          if(y < yStop1){
+        if(z  >=zMin1 && z <= zMax1)
+          if(y < yStop1)
             this.positions.push(pos);
-          }
-        }
-         if(z  >=zMin2 && z <= zMax2){
-          if(y > -yStop2){
+        if(z  >=zMin2 && z <= zMax2)
+          if(y > -yStop2)
             this.positions.push(pos);
-          }
-        }
       }
     }
-    return this.positions;
   }
 };
 
-//var gasPressed = false;
-//var breakPressed = false;
 var controller = {
   // If the number exceeds this in any way, we treat the label as active
   // and highlight it.
@@ -124,8 +175,6 @@ var controller = {
 
   gasPressed: false,
   breakPressed: false,
-  method: 0,
-  socket: io.connect(),
   init: function() {
     this.updateGamepads();
   },
@@ -134,12 +183,12 @@ var controller = {
    * Update the gamepads on the screen, creating new elements from the
    * template.
    */
-  updateGamepads: function() {
+   updateGamepads: function() {
     var el = document.createElement('li');
 
     // Copy from the template.
     el.innerHTML =
-        document.querySelector('#gamepads > .template').innerHTML;
+    document.querySelector('#gamepads > .template').innerHTML;
 
     el.id = 'gamepad-0';
     el.querySelector('.name').innerHTML =  "Lightcontrol IMI 2014"; //gamepad.id ||
@@ -151,7 +200,7 @@ var controller = {
   /**
    * Update a given button on the screen.
    */
-  updateButton: function(button, gamepadId, id) {
+   updateButton: function(button, gamepadId, id) {
     var gamepadEl = document.querySelector('#gamepad-' + gamepadId);
 
     var value, pressed;
@@ -176,37 +225,38 @@ var controller = {
         if(bId >= 1 && bId <= 4){
           this.buttonPressed(bId);
         }
-        if(bId == "m" && this.method == 1){
+        if(bId == "m" && helper.method == 1){
           var orientation = "";
           if(id == "button-left-shoulder-bottom"){
             orientation = "backward";
           }else if(id == "button-right-shoulder-bottom"){
             orientation = "forward";
           }
-         this.sendOrientation(orientation);
+          this.sendOrientation(orientation);
         }
       } else {
-        if(this.method ==2){
+        if(helper.method ==2){
           if(bId == 1){
             this.gasPressed = false;
-          }else if(bId == 2){
+          }
+          else if(bId == 2){
             this.breakPressed = false;
           }
-      }
         buttonEl.classList.remove('pressed');
       }
     }
+  }
   },
 
   /**
    * Update a given analogue stick on the screen.
    */
-  updateAxis: function(value, gamepadId, labelId, stickId, horizontal) {
-  if(this.method >= 0 && this.method <= 2){  
+   updateAxis: function(value, gamepadId, labelId, stickId, horizontal) {
+    if((helper.method >= 0 && helper.method <= 2)|| helper.method >= 3){  
       if(stickId == "stick-2" || stickId == "stick-1"){
-          this.sendPos(value, horizontal);
+        this.sendPos(value, horizontal);
       }
-  }
+    }
     var gamepadEl = document.querySelector('#gamepad-' + gamepadId);
 
     // Update the stick visually.
@@ -229,69 +279,39 @@ var controller = {
                   ["backward", "right", "left", "forward"], //method 0
                   [],                                                                     //method 1
                   ["forward", "backward", 0, 0],                   //method 2
-                  ["backward", "right", "left", "forward"]    //method 3 -- labyrinth
-      ];
-      var o = orientations[this.method][id-1];
-      if(o)
-          if(this.method < 3)
-           this.sendOrientation(o);
-          else
-            this.labyrinth(o);
+                  ["backward", "right", "left", "forward"] ,  //method 3 -- labyrinth
+                  ["backward", "right", "left", "forward"]    //method 4 -- labyrinth
+    ];
+    var o = orientations[helper.method][id-1];
+    if(o)
+       this.sendOrientation(o);
   },
 
   sendPos: function(value, horizontal){
     var nextStep = {x:0, y:0};
     if(value>0.75 || value<-0.75){
-        if(horizontal){
-          //x
-          nextStep.x = value;
-        }else{
-          //y
-          nextStep.y = value;
-        }
-        this.move(nextStep);
-      }
+      if(horizontal)
+        nextStep.x = value;
+      else
+        nextStep.y = value;
+      this.move(nextStep);
+    }
   },
 
   sendOrientation:function(direction){
-    var data = {x: 0, z:0};
-    switch(direction){
-      case "forward" :  data.x = -1;if(this.method>0) this.gasPressed=true; break;
-      case "backward" : data.x = 1; if(this.method>0) this.breakPressed=true;break;
-      case "right" : data.z = 1;break;
-      case "left" : data.z = -1;break;
-    }
-    this.socket.emit('move', data, 0);
-  },
-
-  labyrinth: function(direction){
-    var data = {y: 0, z:0};
-    switch(direction){
-      case "forward" :  data.z = 1; break;
-      case "backward" : data.z = -1;break;
-      case "right" : data.y = 1;break;
-      case "left" : data.y = -1;break;
-    }
-    lab.currentZ += data.z;
-    lab.currentY += data.y;
-    console.log(lab.currentZ);
-    var coordinates = {x : lab.distance, y: lab.currentY, z: lab.currentZ};
-    var co2d = controller.transform3D(coordinates);
-    controller.socket.emit('setPosByDegrees', co2d, 0);
-
-    if(lab.currentZ > lab.zMax || lab.currentZ < lab.zMin || lab.currentY > lab.yMax || lab.currentY < lab.yMin)
-      controller.socket.emit('color', '#ff0000', 0);
-    else
-      controller.socket.emit('color', '#00ff00', 0);
-    if(this.method == 4){
-      for(var i=0;i<obstacles.positions.length;i++){
-        var p = obstacles.positions[i];
-        if(lab.currentY == p[0] && lab.currentZ == p[1])
-          controller.socket.emit('color', '#000ff', 0);
+    if(helper.method < 3){
+      var data = {x: 0, z:0};
+      switch(direction){
+        case "forward" :  data.x = -1;if(helper.method>0) this.gasPressed=true; break;
+        case "backward" : data.x = 1; if(helper.method>0) this.breakPressed=true;break;
+        case "right" : data.z = 1;break;
+        case "left" : data.z = -1;break;
       }
+      helper.socket.emit('move', data, 0);
+    }else{
+      labyrinth.move(direction);
     }
   },
-
 
   move: function(step){
     var x = step.x;
@@ -327,69 +347,5 @@ var controller = {
       }
     }
     this.sendOrientation(orientation);
-  },
-
-  transform3D:function(coordinates){
-            var x = coordinates.x;
-            var y = coordinates.y;
-            var z = coordinates.z;
-            var cX = 0;
-            var cY = 1;
-            var cZ = 0;
-            var betragFuerAlpha = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-            var skalarAlpha = cY * y + cX * x;
-            var alpha = Math.acos(skalarAlpha / betragFuerAlpha);
-            alpha /= Math.PI;
-            alpha *= 180;
-            if (x > 0)
-            {
-                alpha -= 180;
-                alpha *= -1;
-                alpha += 180;
-            }
-            //Beta
-            var distanceToMid = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-            var beta = Math.atan(z / distanceToMid);
-            beta /= Math.PI;
-            beta *= 180;
-            beta += 25;
-
-            var data = [alpha, beta];
-            return data;
-       },
-
-showPos:function(coordinates){
-    if(coordinates.length == 3){
-            var x = coordinates[0];
-            var y = coordinates[1];
-            var z = coordinates[2];
-            var cX = 0;
-            var cY = 1;
-            var cZ = 0;
-            var betragFuerAlpha = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-            var skalarAlpha = cY * y + cX * x;
-            var alpha = Math.acos(skalarAlpha / betragFuerAlpha);
-            alpha /= Math.PI;
-            alpha *= 180;
-            if (x > 0)
-            {
-                alpha -= 180;
-                alpha *= -1;
-                alpha += 180;
-            }
-            //Beta
-            var distanceToMid = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-            var beta = Math.atan(z / distanceToMid);
-            beta /= Math.PI;
-            beta *= 180;
-            beta += 25;
-
-            var data = [alpha, beta];
-            console.log(data);
-           this.socket.emit('setPosByDegrees', data, 0);
-         }else if(coordinates.length == 2){
-
-            this.socket.emit('setPos', coordinates, 0);
-         }
-       }
+  }
 };
