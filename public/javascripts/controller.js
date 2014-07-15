@@ -115,10 +115,24 @@ var labyrinth = {
     }
     this.sendPosition();
 
+    console.log(this.zMax);
+    console.log(this.zMin);
+    console.log(this.xMax);
+    console.log(this.xMin);
+
     if(this.currentZ > this.zMax || this.currentZ < this.zMin || this.currentY > this.yMax || this.currentY < this.yMin)
       helper.socket.emit('color', '#ff0000', 0); //red
     else
       helper.socket.emit('color', '#00ff00', 0); //green
+
+    checkObstacles();
+  },
+
+  sendPosition: function(){
+    helper.socket.emit('setPosByDegrees', helper.transform3D(this.distance, this.currentY, this.currentZ), 0);
+  },
+
+  checkObstacles: function(){
 
     if(helper.method == 4){
       for(var i=0;i<obstacles.positions.length;i++){
@@ -127,10 +141,24 @@ var labyrinth = {
           helper.socket.emit('color', '#000ff', 0);
       }
     }
-  },
 
-  sendPosition: function(){
-    helper.socket.emit('setPosByDegrees', helper.transform3D(this.distance, this.currentY, this.currentZ), 0);
+    var xInArray = currentY - 108;
+    var yInArray = 189 - currentZ;
+
+    if(helper.method == 3){
+        var o = obstaclesFromFile[yInArray];
+        for(var j=0;j<o.length;j++){
+          if(xInArray== o[j]){
+            alert("gegengefahren");
+            helper.socket.emit('color', '#000ff', 0);
+          }
+        }
+
+          if(obstaclesFromFile[yInArray][xInArray]){
+            alert("gegengefahren");
+            helper.socket.emit('color', '#000ff', 0);
+          }
+        }
   }
 };
 
