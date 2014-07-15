@@ -17,6 +17,16 @@
  * @author mwichary@google.com (Marcin Wichary)
  */
 var lastId = 1000;
+var nextStep = {x:null, y:null};
+var socket = io.connect();
+var method = 0;
+
+$('#methodList').change(function(){ 
+      method = $("#methodList")[0].selectedIndex ;
+})
+
+var gasPressed = false;
+var breakPressed = false;
 var tester = {
   // If the number exceeds this in any way, we treat the label as active
   // and highlight it.
@@ -102,14 +112,62 @@ var tester = {
 
     // Update the button visually.
     var buttonEl = gamepadEl.querySelector('[name="' + id + '"]');
+    var bId = id.substring(id.length-1);
+    
+    if(method == 1){
+      if(id == "button-right-shoulder-bottom"){
+        if(buttonEl.classList[1]){
+          gasPressed = true;
+        }else{
+          gasPressed = false;
+        }
+      }else if(id == "button-left-shoulder-bottom"){
+        if(buttonEl.classList[1]){
+          breakPressed = true;
+        }else{
+          breakPressed = false;
+        }
+      }
+    }
+
     if (buttonEl) { // Extraneous buttons have just a label.
       if (pressed) {
         buttonEl.classList.add('pressed');
         var buttonId = id.substring(id.length-1);
         if(buttonId >= 1 && buttonId <= 4){
-          this.buttonPressed(buttonId);
+          if(method == 0)
+            this.buttonPressed(buttonId);
+          if(method == 2){
+            var orientation = "";
+            if(buttonId == 1){
+              orientation = "forward";
+              gasPressed = true;
+            }else if(buttonId == 3){
+              orientation = "backward";
+              breakPressed = true;
+            }
+            socket.emit('move', orientation);
+          }
+        }
+        if(buttonId == "m" && method == 1){
+          var orientation = "";
+          if(id == "button-left-shoulder-bottom"){
+            //move backward
+            orientation = "backward";
+          }else if(id == "button-right-shoulder-bottom"){
+            //move forward
+            orientation = "forward";
+          }
+          socket.emit('move', orientation);
         }
       } else {
+        if(method ==2){
+        if(id == "button-1"){
+          gasPressed = false;
+        }else if(id == "button-1"){
+          breakPressed = false;
+        }
+      }
         buttonEl.classList.remove('pressed');
       }
     }
@@ -119,6 +177,16 @@ var tester = {
    * Update a given analogue stick on the screen.
    */
   updateAxis: function(value, gamepadId, labelId, stickId, horizontal) {
+  if(method == 0){  
+      if(stickId == "stick-2" || stickId == "stick-1"){
+          this.sendPos(value, horizontal);
+      }
+  }else if(method == 1 || method == 2){
+      if(stickId == "stick-1"){
+          this.sendRightOrLeft(value, horizontal);
+      }
+  }
+
     var gamepadEl = document.querySelector('#gamepad-' + gamepadId);
 
     // Update the stick visually.
@@ -136,17 +204,81 @@ var tester = {
   },
 
   buttonPressed: function(id) {
-    //if(id!=lastId){
-      var socket = io.connect();
-      var orientation = [];
-      switch(id){
-        case "1": orientation = "backward"; break; //move down
-        case "2": orientation = "right"; break; //move right
-        case "3": orientation = "left"; break; //move left
-        case "4": orientation = "forward"; break; //move up
+    var orientation = [];
+    switch(id){
+      case "1": orientation = "backward"; break; //move down
+      case "2": orientation = "right"; break; //move right
+      case "3": orientation = "left"; break; //move left
+      case "4": orientation = "forward"; break; //move up
+    }
+    socket.emit('move', orientation);
+  },
+
+  sendPos: function(value, horizontal){
+    if(value>0.75 || value<-0.75){
+        if(horizontal){
+          //x
+          nextStep.x = value;
+          nextStep.y = 0;
+        }else{
+          //y
+          nextStep.y = value;
+          nextStep.x = 0;
+        }
+
+        this.move(nextStep);
       }
-      socket.emit('move', orientation);
-    // }
-    lastId = id;
+  },
+
+  sendRightOrLeft: function(value, horizontal){
+    if(gasPressed || breakPressed){
+      if(value>0.75 || value<-0.75){
+        if(horizontal){
+          if(value > 0){
+            //move right
+            socket.emit('move', "right");
+          }else{
+            //move left
+            socket.emit('move', "left");
+          }
+        }
+      }
+    }
+  },
+
+  move: function(step){
+    var x = step.x;
+    var y = step.y;
+    var orientation;
+    if(x > 0){
+      if(y>0){
+        if(x>y){
+          orientation = "right";
+        }else{
+          orientation = "backward";
+        }
+      }else{
+        if(x>y){
+          orientation = "right";
+        }else{
+          orientation = "forward";
+        }
+      }
+    }else{
+      if(y>0){
+        if(y>x){
+          orientation = "backward";
+        }else{
+          orientation = "left";
+        }
+      }else{
+        if(y>x){
+          orientation = "left";
+        }else{
+          orientation = "forward";
+        }
+      }
+    }
+    socket.emit('move', orientation);
   }
 };

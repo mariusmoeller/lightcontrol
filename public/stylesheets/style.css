@@ -12,11 +12,42 @@ a {
     margin-top: 20px;
 }
 
-img{
+img {
     position: absolute;
     margin: auto;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
+}
+
+#drawing-board {
+    line-height: 0;
+}
+
+.div-pos {
+    border: 1px solid gray;
+    height: 10px;
+    width: 10px;
+    display: inline-block;
+    cursor: pointer;
+}
+
+#sliders {
+    overflow-x: auto;
+    white-space: nowrap;
+    overflow-y: hidden;
+}
+
+input[type=range] {
+    -webkit-appearance: slider-vertical;
+    display: inline !important;
+    width: 30px !important;
+    height: 200px;
+}
+
+.infoText {
+    text-align: center;
+    font-size: 18pt;
+
 }

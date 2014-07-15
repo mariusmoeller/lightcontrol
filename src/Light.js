@@ -9,6 +9,7 @@ Light.prototype.setColor = function(rgb) {
     data[this.conf.g.channel] = rgb[1];
     data[this.conf.b.channel] = rgb[2];
 
+    // console.log(data)
     this.artnet.send(data);
 }
 

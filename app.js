@@ -9,8 +9,8 @@ var user = require('./routes/user');
 var showRoute = require('./routes/show');
 var pongRoute = require('./routes/pong');
 var carRoute = require('./routes/car');
-var timerRoute = require('./routes/timer');
 var controllerRoute = require('./routes/controller');
+var timerRoute = require('./routes/timer');
 var http = require('http');
 var path = require('path');
 var socketio = require('socket.io');
@@ -18,7 +18,7 @@ var debug = require('debug')('app');
 var sanitize = require('./src/sanitize');
 var _ = require('lodash-node');
 
-// Set up configuration and command line arguments
+// Load configuration and command line arguments
 var nconf = require('nconf');
 nconf.argv({
         "a": {
@@ -59,6 +59,9 @@ app.get('/car', carRoute.list);
 app.get('/controller', controllerRoute.list);
 app.get('/timer', timerRoute.list);
 
+app.get('/conf', function(req, res) {res.render('conf')});
+app.get('/draw', function(req, res) {res.render('draw')});
+
 var server = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
@@ -71,57 +74,62 @@ var artnetClient = new Artnet(nconf.get('address'), nconf.get('port'));
 var Light = require('./src/Light');
 var MovingHead = require('./src/MovingHead');
 
-var washs = nconf.get('washs');
-_(washs).forEach(function(wash, i) {
-    washs[i] = new MovingHead(wash, artnetClient);
+// TODO: It might be better to change hierarchy to:
+// device {id: X, type: X} so that each light, moving head etc has a unique id
+// object creation depending on type a la new DeviceType(conf, artnetClient)
+
+var devices = nconf.get('devices');
+_(devices).forEach(function(device, i) {
+    // TODO: Allow different devices, not only moving heads
+    devices[i] = new MovingHead(device, artnetClient);
 });
 
 // Misc
-var movement = require('./src/movement');
 var Show = require('./src/Show');
 
 var record = false;
 var show = Show.createShow();
 
-// TODO: remove legacy light
-var washLight = new MovingHead(nconf.get('washs:0'), artnetClient);
-washLight.turnOn();
+// TODO: Put this somewhere else. Maybe turn everything on at start or better
+// save status in config and then send when server starts
+devices[0].turnOn();
 
+// TODO: Change to streaming socketio for improved performance
 // Listen to socketio connections
 socketio.listen(server).on('connection', function(socket) {
-	socket.on('movement', function(data, lightID) {
+    socket.on('setPosByDegrees', function(degrees) {
+        debug('setPosByDegrees: ' + degrees.toString());
+
+        devices[0].setPosByDegrees(degrees[0], degrees[1]);
+    })
+
+    socket.on('movement', function(data, id) {
 
         data = sanitize.movement(data);
-        washs[lightID].setPos(data[2], data[0]);
+        // TODO: is Z and X swapped? pan should be z and tilt x?
+        devices[0].setPos(data[2], data[0]);
 
         debug('movement data send to artnet client, data: ' + data);
 
         if (record)
             show.addData(1, data);
-	});
-
-    socket.on('move', function(step) {
-
-        // var data = movement.move(step);
-        switch(step){
-                                   // y, x
-            case "forward":  washLight.move(0, 5);break;
-            case "backward": washLight.move(0, -5);break;
-            case "left":     washLight.move(-3, 0);break;
-            case "right":    washLight.move(3, 0);break;
-        }
-
-        if (record)
-            show.addData(1, data);
     });
 
-    socket.on('color', function(hexColor, lightID) {
+    socket.on('move', function(step) {
+        var id = 0;
+        devices[id].makeStep(step);
+        debug('movement data send to artnet client, direction: ' + step);
+    });
+
+    socket.on('color', function(hexColor, id) {
         debug('Recieved color data: ' + hexColor);
+        if (typeof id == 'undefined')
+            id = 0;
 
         // Cut off #, then convert string to base 16 number
         var num = parseInt(hexColor.substring(1), 16);
 
-        washs[lightID].setColor([num >> 16, num >> 8 & 255, num & 255])
+        devices[id].setColor([num >> 16, num >> 8 & 255, num & 255])
 
         if (record)
             show.addData(2, [num >> 16, num >> 8 & 255, num & 255]);
@@ -140,24 +148,36 @@ socketio.listen(server).on('connection', function(socket) {
             var xPos = pong.getBallPos()[0] + 100;
             var yPos = pong.getBallPos()[1] + 100;
 
-            washLight.setPos(yPos, xPos);
+            devices[0].setPos(yPos, xPos);
 
             pong.makeStep()
         }, 10);
     })
 
-    socket.on('record', function(state) {
-        console.log(state);
+    // TODO: Make own event or path for draw
+    socket.on('record', function(xData, yData) {
+        _(yData).forEach(function(value, i) {
+            yData[i] = sanitize.movement([0,0, value])[2];
+        })
 
-        if (state) {
-            record = state;
-        } else {
-            record = state
-            //console.log(show.getAll())
-            show.save();
-            show.deleteAll()
+        devices[0].setPosDelayed(xData, yData, 40);
+    })
 
-        }
+    // socket.on('record', function(state) {
+    //     console.log(state);
+    //
+    //     if (state) {
+    //         record = state;
+    //     } else {
+    //         record = state
+    //         //console.log(show.getAll())
+    //         show.save();
+    //         show.deleteAll()
+    //     }
+    // })
+    socket.on('direct', function(data) {
+        console.log(data);
+        artnetClient.send(data);
     })
 
 
@@ -169,7 +189,7 @@ socketio.listen(server).on('connection', function(socket) {
 
              var num = parseInt(hexColor.substring(1), 16);
 
-            washs[0].setColor([num >> 16, num >> 8 & 255, num & 255])
+            devices[0].setColor([num >> 16, num >> 8 & 255, num & 255])
 
             console.log(num);
 
@@ -180,5 +200,9 @@ socketio.listen(server).on('connection', function(socket) {
 
         }, 1000);
 
-    })
+    });
+    
+
+
+
 });
