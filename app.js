@@ -10,7 +10,6 @@ var showRoute = require('./routes/show');
 var pongRoute = require('./routes/pong');
 var carRoute = require('./routes/car');
 var controllerRoute = require('./routes/controller');
-var labyrinthRoute = require('./routes/labyrinth');
 var http = require('http');
 var path = require('path');
 var socketio = require('socket.io');
@@ -63,7 +62,6 @@ app.get('/shows', showRoute.list);
 app.get('/pong', pongRoute.list);
 app.get('/car', carRoute.list);
 app.get('/controller', controllerRoute.list);
-app.get('/labyrinth', labyrinthRoute.list);
 
 app.get('/conf', function(req, res) {res.render('conf')});
 app.get('/draw', function(req, res) {res.render('draw')});

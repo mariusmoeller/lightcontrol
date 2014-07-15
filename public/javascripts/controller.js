@@ -19,16 +19,19 @@
 $('#methodList').change(function(){ 
   helper.method = $("#methodList")[0].selectedIndex ;
   if(helper.method >= 3){
-
-    //$('.collapse').collapse();
     $('#labyrinthOptions').show();
-    if(helper.method == 4)
-      obstacles.init();
   }
 });
 
 $('#labConfDone').click(function(){
-      labyrinth.init();
+      //labyrinth.init();
+      $("body").children().hide();
+      $('#race').show();
+});
+
+$('#backButton').click(function(){
+      $("body").children().show();
+      $('#race').hide();
 });
 
 $('#coordinates').click(function(){
@@ -132,33 +135,22 @@ var labyrinth = {
   },
 
   checkObstacles: function(){
-
-    if(helper.method == 4){
-      for(var i=0;i<obstacles.positions.length;i++){
-        var p = obstacles.positions[i];
-        if(this.currentY == p[0] && this.currentZ == p[1])
-          helper.socket.emit('color', '#000ff', 0);
-      }
-    }
-
     var xInArray = currentY - 108;
     var yInArray = 189 - currentZ;
 
-    if(helper.method == 3){
-        var o = obstaclesFromFile[yInArray];
-        for(var j=0;j<o.length;j++){
-          if(xInArray== o[j]){
-            alert("gegengefahren");
-            helper.socket.emit('color', '#000ff', 0);
-          }
-        }
+    var o = obstaclesFromFile[yInArray];
+    for(var j=0;j<o.length;j++){
+      if(xInArray== o[j]){
+        alert("gegengefahren");
+        helper.socket.emit('color', '#000ff', 0);
+      }
+    }
 
-          if(obstaclesFromFile[yInArray][xInArray]){
-            alert("gegengefahren");
-            helper.socket.emit('color', '#000ff', 0);
-          }
-        }
-  }
+      if(obstaclesFromFile[yInArray][xInArray]){
+        alert("gegengefahren");
+        helper.socket.emit('color', '#000ff', 0);
+      }
+    }
 };
 
 var obstacles = {
@@ -305,11 +297,10 @@ var controller = {
   buttonPressed: function(id) {
     var orientations = [
                   // A    B   X   Y
-                  ["backward", "right", "left", "forward"], //method 0
-                  [],                                                                     //method 1
-                  ["forward", "backward", 0, 0],                   //method 2
-                  ["backward", "right", "left", "forward"] ,  //method 3 -- labyrinth
-                  ["backward", "right", "left", "forward"]    //method 4 -- labyrinth
+                  ["backward", "right", "left", "forward"],    //method 0
+                  [],                                                      //method 1
+                  ["forward", "backward", 0, 0],              //method 2
+                  ["backward", "right", "left", "forward"]    //method 3 -- labyrinth
     ];
     var o = orientations[helper.method][id-1];
     if(o)
