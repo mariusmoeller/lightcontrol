@@ -24,7 +24,7 @@ $('#methodList').change(function(){
 });
 
 $('#labConfDone').click(function(){
-      //labyrinth.init();
+      labyrinth.init();
       $("body").children().hide();
       $('#race').show();
 });
@@ -96,38 +96,54 @@ var labyrinth = {
     this.screenHeight = parseInt($('#screenHeight').val());
     this.screenWidth = parseInt($('#screenWidth').val());
 
+    //top left corner
     this.zMax = this.projectorHeight - this.washHeight + this.screenHeight;
     this.zMin = this.projectorHeight - this.washHeight;
     this.yMax = Math.round(this.screenWidth / 2);
     this.yMin = Math.round((-1) * this.screenWidth / 2);
+
+    //start line
 
     this.currentY = Math.round((this.screenWidth / 2) * (-1) + 5);
     this.currentZ = this.projectorHeight - this.washHeight + this.screenHeight;
 
     this.sendPosition();
     helper.socket.emit('color', '#00ff00', 0);
+    player.reset();
   },
 
   move: function(direction){
+    player.moves++;
+    if(player.moves == 1)
+      game.startGame();
+
     switch(direction){
       case "forward" :   this.currentZ++;  break;
       case "backward" :  this.currentZ--; break;
       case "right" : this.currentY++; break;
       case "left" : this.currentY--; break;
     }
-    this.sendPosition();
 
-    console.log(this.zMax);
-    console.log(this.zMin);
-    console.log(this.xMax);
-    console.log(this.xMin);
+//    console.log(this.zMax);
+ //   console.log(this.zMin);
+  //  console.log(this.yMax);
+   // console.log(this.yMin);
 
-    if(this.currentZ > this.zMax || this.currentZ < this.zMin || this.currentY > this.yMax || this.currentY < this.yMin)
+    if(this.currentZ > this.zMax || this.currentZ < this.zMin || this.currentY > this.yMax || this.currentY < this.yMin){
       helper.socket.emit('color', '#ff0000', 0); //red
-    else
+    }else{
       helper.socket.emit('color', '#00ff00', 0); //green
-
-    checkObstacles();
+      var obstaclesImWeg = this.checkObstacles();
+      if(!obstaclesImWeg){
+         this.sendPosition();
+         var startLineImWeg = this.checkStartLine();
+         if(startLineImWeg){
+          game.turnFinished();
+         }
+       }else{
+          helper.socket.emit('color', '#0000ff', 0); //blue
+       }
+    }
   },
 
   sendPosition: function(){
@@ -135,22 +151,103 @@ var labyrinth = {
   },
 
   checkObstacles: function(){
-    var xInArray = currentY - 108;
-    var yInArray = 189 - currentZ;
+    var xInArray = this.currentY + Math.round(this.screenWidth/2);
+    var yInArray = this.zMax - this.currentZ;
 
-    var o = obstaclesFromFile[yInArray];
-    for(var j=0;j<o.length;j++){
-      if(xInArray== o[j]){
-        alert("gegengefahren");
-        helper.socket.emit('color', '#000ff', 0);
-      }
-    }
+    // var o = obstaclesFromFile[yInArray];
+    // for(var j=0;j<o.length;j++){
+    //   if(xInArray== o[j]){
+    //     alert("gegengefahren");
+    //     helper.socket.emit('color', '#000ff', 0);
+    //   }
+    // }
 
       if(obstaclesFromFile[yInArray][xInArray]){
-        alert("gegengefahren");
-        helper.socket.emit('color', '#000ff', 0);
+        console.log("gegengefahren");
+        return true;
+        //helper.socket.emit('color', '#000ff', 0);
       }
+      return false;
+    },
+
+    checkStartLine: function() {
+      var xInArray = this.currentY + Math.round(this.screenWidth/2);
+    var yInArray = this.zMax - this.currentZ;
+
+      if(startLine[yInArray][xInArray]){
+        console.log("turn passed");
+        return true;
+      }
+      return false;
     }
+};
+
+var game = {
+  turnsToFinish : 8,
+  timeHighScore : 0,
+  totalTime : 0,
+  turnTime : 0,
+  timer : null,
+  showStatus : function(seconds) {
+    if($('#race').has('div').length){
+      $('.alert').remove();
+    }
+    var alert = $('<div/>', {
+          role: 'alert',
+          text: 'Succes! You finished one turn in ' + seconds + ' seconds!',
+          style: 'position: relative; top: 50px;'
+    }).addClass('alert').addClass('alert-success');
+    $('#race').append(alert);
+
+    setTimeout(function() {
+        $('.alert').fadeOut('slow');
+    }, 2000); 
+  },
+  startGame : function() {
+    this.timer = setInterval(function () {
+        game.totalTime++;
+        game.turnTime++;
+    }, 1000);
+  },
+  turnFinished : function() {
+    var timeForRound = this.turnTime;
+    this.showStatus(timeForRound);
+    if(timeForRound > player.fastestTurn){
+      player.fastestTurn = timeForRound;
+    }
+    player.turnsFinished++;
+    if(player.turnsFinished == this.turnsToFinish){
+      this.gameFinished();
+    }
+    this.turnTime = 0;
+  },
+  gameFinished : function() {
+    clearInterval(this.timer);
+    if($('#race').has('div').length){
+      $('.alert').remove();
+    }
+    var alert = $('<div/>', {
+          role: 'alert',
+          text: 'Succes! You finished the game in ' + game.totalTime + ' seconds! The fastest Turn took ' + player.fastestTurn + " seconds!",
+          style: 'position: relative; top: 50px;'
+    }).addClass('alert').addClass('alert-success');
+     $('#race').append(alert);
+    if(game.totalTime > this.timeHighScore){
+      this.timeHighScore = game.totalTime;
+    }
+  }
+};
+
+var player = {
+  turnsFinished : 0,
+  score : 0,
+  moves : 0,
+  fastestTurn: 0,
+  reset : function() {
+    this.turnsFinished = 0;
+    this.score = 0;
+    this.moves = 0;
+  }
 };
 
 var obstacles = {
