@@ -90,22 +90,33 @@ var labyrinth = {
   zMin : 0,
 
   init: function(){
+    var median = 0;
+    for(var i=0;i<startLine.x.length;i++){
+      median+=startLine.x[i];
+    }
+    median /= startLine.x.length;
+    startLine.median = median;
+
     this.distance = parseInt($('#distance').val());
     this.washHeight = parseInt($('#washHeight').val());
     this.projectorHeight = parseInt($('#projectorHeight').val());
     this.screenHeight = parseInt($('#screenHeight').val());
     this.screenWidth = parseInt($('#screenWidth').val());
 
-    //top left corner
+    
     this.zMax = this.projectorHeight - this.washHeight + this.screenHeight;
     this.zMin = this.projectorHeight - this.washHeight;
     this.yMax = Math.round(this.screenWidth / 2);
     this.yMin = Math.round((-1) * this.screenWidth / 2);
 
-    //start line
+    
+    //top left corner
+    // this.currentY = Math.round((this.screenWidth / 2) * (-1) + 5);
+    // this.currentZ = this.projectorHeight - this.washHeight + this.screenHeight;
 
-    this.currentY = Math.round((this.screenWidth / 2) * (-1) + 5);
-    this.currentZ = this.projectorHeight - this.washHeight + this.screenHeight;
+    //start line
+    this.currentY = this.yMin + startLine.median;
+    this.currentZ = this.zMax - startLine.y;
 
     this.sendPosition();
     helper.socket.emit('color', '#00ff00', 0);
@@ -128,19 +139,25 @@ var labyrinth = {
  //   console.log(this.zMin);
   //  console.log(this.yMax);
    // console.log(this.yMin);
-
+    this.sendPosition();
     if(this.currentZ > this.zMax || this.currentZ < this.zMin || this.currentY > this.yMax || this.currentY < this.yMin){
+      console.log("aus dem Feld raus");
       helper.socket.emit('color', '#ff0000', 0); //red
     }else{
       helper.socket.emit('color', '#00ff00', 0); //green
       var obstaclesImWeg = this.checkObstacles();
       if(!obstaclesImWeg){
-         this.sendPosition();
+         // this.sendPosition();
          var startLineImWeg = this.checkStartLine();
          if(startLineImWeg){
+          console.log("start linie im weg");
           game.turnFinished();
+          helper.socket.emit('color', '#ffff00', 0); //
          }
        }else{
+        console.log("obstacles im weg");
+          player.obstaclesCrashed++;
+          player.updateScore();
           helper.socket.emit('color', '#0000ff', 0); //blue
        }
     }
@@ -161,22 +178,29 @@ var labyrinth = {
     //     helper.socket.emit('color', '#000ff', 0);
     //   }
     // }
-
+    if(obstaclesFromFile[yInArray]){
       if(obstaclesFromFile[yInArray][xInArray]){
-        console.log("gegengefahren");
+      //  alert("gegengefahren");
         return true;
         //helper.socket.emit('color', '#000ff', 0);
       }
+    }
       return false;
     },
 
     checkStartLine: function() {
-      var xInArray = this.currentY + Math.round(this.screenWidth/2);
-    var yInArray = this.zMax - this.currentZ;
+      var yInArray = this.yMax - this.currentY;
+      var xInArray = this.zMin - this.currentZ;
 
-      if(startLine[yInArray][xInArray]){
-        console.log("turn passed");
-        return true;
+      return false;
+      // var y = this.yMin + startLine.median;
+      // var x = this.zMax - startLine.y;
+      // if(y == y){
+
+      if(yInArray == startLine.y){
+        if(xInArray >= startLine.x[0] && xInArray <= startLine.x[startLine.x.length-1]){
+          return true;
+        }
       }
       return false;
     }
@@ -185,6 +209,7 @@ var labyrinth = {
 var game = {
   turnsToFinish : 8,
   timeHighScore : 0,
+  pointHighScore : 0,
   totalTime : 0,
   turnTime : 0,
   timer : null,
@@ -228,12 +253,16 @@ var game = {
     }
     var alert = $('<div/>', {
           role: 'alert',
-          text: 'Succes! You finished the game in ' + game.totalTime + ' seconds! The fastest Turn took ' + player.fastestTurn + " seconds!",
+          text: 'Succes! You finished the game in ' + game.totalTime + ' seconds! The fastest Turn took ' + player.fastestTurn + " seconds! You reached " + player.score + " points!",
           style: 'position: relative; top: 50px;'
     }).addClass('alert').addClass('alert-success');
      $('#race').append(alert);
     if(game.totalTime > this.timeHighScore){
       this.timeHighScore = game.totalTime;
+    }
+    if(game.pointHighScore > player.score){
+      alert("Highscore");
+      game.pointHighScore = player.score;
     }
   }
 };
@@ -242,11 +271,16 @@ var player = {
   turnsFinished : 0,
   score : 0,
   moves : 0,
+  obstaclesCrashed : 0,
   fastestTurn: 0,
   reset : function() {
     this.turnsFinished = 0;
     this.score = 0;
     this.moves = 0;
+    this.obstaclesCrashed = 0;
+  },
+  updateScore : function() {
+    this.score = (this.moves / this.obstaclesCrashed) * game.totalTime;
   }
 };
 
