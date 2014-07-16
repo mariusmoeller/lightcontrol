@@ -127,35 +127,35 @@ var labyrinth = {
     player.moves++;
     if(player.moves == 1)
       game.startGame();
-
+    var y = this.currentY;
+    var z = this.currentZ;
     switch(direction){
-      case "forward" :   this.currentZ++;  break;
-      case "backward" :  this.currentZ--; break;
-      case "right" : this.currentY++; break;
-      case "left" : this.currentY--; break;
+      case "forward" :   z++;  break;
+      case "backward" :  z--; break;
+      case "right" : y++; break;
+      case "left" : y--; break;
     }
+    this.currentZ += z;
+    this.currentY += y;
 
-//    console.log(this.zMax);
- //   console.log(this.zMin);
-  //  console.log(this.yMax);
-   // console.log(this.yMin);
-    this.sendPosition();
-    if(this.currentZ > this.zMax || this.currentZ < this.zMin || this.currentY > this.yMax || this.currentY < this.yMin){
+    if(z > this.zMax || z < this.zMin || y > this.yMax || y < this.yMin){
       console.log("aus dem Feld raus");
       helper.socket.emit('color', '#ff0000', 0); //red
     }else{
       helper.socket.emit('color', '#00ff00', 0); //green
       var obstaclesImWeg = this.checkObstacles();
       if(!obstaclesImWeg){
-         // this.sendPosition();
-         var startLineImWeg = this.checkStartLine();
-         if(startLineImWeg){
+        this.currentY = y;
+        this.currentZ = z;
+        this.sendPosition();
+
+        var startLineImWeg = this.checkStartLine();
+        if(startLineImWeg){
           console.log("start linie im weg");
           game.turnFinished();
-          helper.socket.emit('color', '#ffff00', 0); //
-         }
+          helper.socket.emit('color', '#ffff00', 0); //yellow
+        }
        }else{
-        console.log("obstacles im weg");
           player.obstaclesCrashed++;
           player.updateScore();
           helper.socket.emit('color', '#0000ff', 0); //blue
@@ -171,32 +171,17 @@ var labyrinth = {
     var xInArray = this.currentY + Math.round(this.screenWidth/2);
     var yInArray = this.zMax - this.currentZ;
 
-    // var o = obstaclesFromFile[yInArray];
-    // for(var j=0;j<o.length;j++){
-    //   if(xInArray== o[j]){
-    //     alert("gegengefahren");
-    //     helper.socket.emit('color', '#000ff', 0);
-    //   }
-    // }
     if(obstaclesFromFile[yInArray]){
       if(obstaclesFromFile[yInArray][xInArray]){
-      //  alert("gegengefahren");
         return true;
-        //helper.socket.emit('color', '#000ff', 0);
       }
     }
       return false;
     },
 
     checkStartLine: function() {
-      var yInArray = this.yMax - this.currentY;
-      var xInArray = this.zMin - this.currentZ;
-
-      return false;
-      // var y = this.yMin + startLine.median;
-      // var x = this.zMax - startLine.y;
-      // if(y == y){
-
+      var xInArray = this.currentY + Math.round(this.screenWidth/2);
+      var yInArray = this.zMax - this.currentZ;
       if(yInArray == startLine.y){
         if(xInArray >= startLine.x[0] && xInArray <= startLine.x[startLine.x.length-1]){
           return true;
@@ -229,9 +214,13 @@ var game = {
     }, 2000); 
   },
   startGame : function() {
+    player.reset();
+    $('#gameStatus').text("started");
+    $('#totalTurns').text(game.turnsToFinish);
     this.timer = setInterval(function () {
         game.totalTime++;
         game.turnTime++;
+        $('#time').text(game.totalTime);
     }, 1000);
   },
   turnFinished : function() {
@@ -241,6 +230,7 @@ var game = {
       player.fastestTurn = timeForRound;
     }
     player.turnsFinished++;
+    $('#absolvedTurns').text(player.turnsFinished);
     if(player.turnsFinished == this.turnsToFinish){
       this.gameFinished();
     }
@@ -264,6 +254,7 @@ var game = {
       alert("Highscore");
       game.pointHighScore = player.score;
     }
+    $('#gameStatus').text('finished');
   }
 };
 
@@ -280,7 +271,8 @@ var player = {
     this.obstaclesCrashed = 0;
   },
   updateScore : function() {
-    this.score = (this.moves / this.obstaclesCrashed) * game.totalTime;
+    this.score = Math.round((this.moves / this.obstaclesCrashed) * game.totalTime);
+    $('#score').text(this.score);
   }
 };
 

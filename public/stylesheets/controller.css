@@ -697,6 +697,14 @@ img.bg {
     width: 100px;
 }
 
+#game {
+    position: fixed;
+    box-shadow: 0 0 20px black;
+    right: 20px;
+    width: 400px;
+    top: 40px;
+}
+
 #race {
   display: none;
 }

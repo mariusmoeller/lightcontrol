@@ -51,6 +51,24 @@ block content
   div#race
    img.bg(src='img/strecke.jpg')
    button#backButton.btn.btn-default.btn-lg.btn-block Back
+   div.panel.panel-info#game
+    div.panel-heading Game Information
+    div.panel-body
+      p
+        | Game 
+        span#gameStatus not started
+      p
+        | Turns: 
+        span#absolvedTurns 0
+        | /
+        span#totalTurns 5
+      p
+        | Score: 
+        span#score 0
+        |  Points
+      p
+        span#time 0
+        |  seconds
   ul#gamepads
    li.template
     .buttons
