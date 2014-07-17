@@ -267,35 +267,7 @@ function rgbToHex(r, g, b) {
                     colorArray[counter] = [hS,sS,lS];                    
                     counter++;      
             }
-            var splitVal = 60;
-            var interval = 10;
-            var temp = 0;
-            var secondsToMinute = parseInt($('.knob.second').val());
-            if(secondsToMinute === 0)
-                secondsToMinute = 60;
-
-            var times = parseInt($('.knob.minute').val());
-
-            for(var t=0; t<times;t++){
-                var firstVal = secondsToMinute+ (temp * splitVal) - Math.ceil(interval/2) - 1;
-                var lVal = colorArray[firstVal][2]; 
-                var c = lVal / 5;
-                var constante = 0;
-                 //anderer wert
-                for(var i=0;i<interval-1 && colorArray.length > firstVal+i;i++){
-
-                    if(i<Math.ceil(interval/2)){
-                        constante += c;
-                    }else{
-                        constante -= c;
-                    }
-                    colorArray[firstVal+i][2] = colorArray[i][2] - constante;
-
-                    if (colorArray[firstVal+i][2] < 0)
-                        colorArray[firstVal+i][2] = 0;
-                }
-                temp++;
-            }
+            
             for (var i = 0; i < colorArray.length; i++) {
                 var colors = colorArray[i];
                 var RGB = hslToRgb(colors[0],colors[1],colors[2]);
@@ -304,7 +276,7 @@ function rgbToHex(r, g, b) {
             }
 
             //blinking in the end
-            for (var i = 0; i < interval; i++) {
+            for (var i = 0; i < 5; i++) {
                 if(i%2 == 0)
                     colorArray.push('#000000');
                 else
