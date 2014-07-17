@@ -54,6 +54,16 @@ block content
    div.panel.panel-info#game
     div.panel-heading Game Information
     div.panel-body
+      .btn-group
+        button#hoch.btn.btn-default(type='button') Hoch
+        button#runter.btn.btn-default(type='button') Runter
+        button#rechts.btn.btn-default(type='button') Rechts
+        button#links.btn.btn-default(type='button') Links
+      p
+        | Position: 
+        span#xPos 0
+        | | 
+        span#yPos 0 
       p
         | Game 
         span#gameStatus not started
@@ -69,6 +79,24 @@ block content
       p
         span#time 0
         |  seconds
+  #gameFinished.modal.fade(tabindex='-1', role='dialog', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-body
+          | You finished the Game in 
+          span#gameTime 12387
+          |  seconds!
+          br
+          | Your fastest turn took 
+          span#fastestTurn 11
+          |  seconds! 
+          br
+          | You reached 
+          span#totalScore 0
+          |  points!
+        .modal-footer
+          button#again.btn.btn-default(type='button', data-dismiss='modal') Try Again
+          button#back.btn.btn-primary(type='button') Back to App
   ul#gamepads
    li.template
     .buttons

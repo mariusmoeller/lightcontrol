@@ -30,9 +30,18 @@ $('#labConfDone').click(function(){
 });
 
 $('#backButton').click(function(){
-      $("body").children().show();
-      $('#race').hide();
+    labyrinth.hide();
 });
+
+$('#back').click(function(){
+  $('#gameFinished').modal('hide');
+   labyrinth.hide();
+});
+
+$('#again').click(function(){
+  $('#gameFinished').modal('hide');
+  labyrinth.init();
+})
 
 $('#coordinates').click(function(){
   var i = $('#coordinatesInput').val();
@@ -72,6 +81,8 @@ $('#coordinates').click(function(){
     beta += 25;
 
     var data = [alpha, beta];
+    $('#xPos').text(Math.round(alpha*100)/100);
+    $('#yPos').text(Math.round(beta*100)/100);
     return data;
   }
 };
@@ -90,6 +101,7 @@ var labyrinth = {
   zMin : 0,
 
   init: function(){
+    this.initButtons();
     var median = 0;
     for(var i=0;i<startLine.x.length;i++){
       median+=startLine.x[i];
@@ -109,11 +121,6 @@ var labyrinth = {
     this.yMax = Math.round(this.screenWidth / 2);
     this.yMin = Math.round((-1) * this.screenWidth / 2);
 
-    
-    //top left corner
-    // this.currentY = Math.round((this.screenWidth / 2) * (-1) + 5);
-    // this.currentZ = this.projectorHeight - this.washHeight + this.screenHeight;
-
     //start line
     this.currentY = this.yMin + startLine.median;
     this.currentZ = this.zMax - startLine.y;
@@ -123,10 +130,16 @@ var labyrinth = {
     player.reset();
   },
 
+  hide: function(){
+    $("body").children().show();
+    $('#race').hide();
+  },
+
   move: function(direction){
     player.moves++;
-    if(player.moves == 1)
+    if(player.moves == 1){
       game.startGame();
+    }
     var y = this.currentY;
     var z = this.currentZ;
     switch(direction){
@@ -188,11 +201,17 @@ var labyrinth = {
         }
       }
       return false;
+    },
+    initButtons: function() {
+      $('#hoch').click(function(){labyrinth.move("backward")});      
+      $('#runter').click(function(){labyrinth.move("forward")});
+      $('#rechts').click(function(){labyrinth.move("right")});
+      $('#links').click(function(){labyrinth.move("left")});
     }
 };
 
 var game = {
-  turnsToFinish : 8,
+  turnsToFinish : 2,
   timeHighScore : 0,
   pointHighScore : 0,
   totalTime : 0,
@@ -214,7 +233,6 @@ var game = {
     }, 2000); 
   },
   startGame : function() {
-    player.reset();
     $('#gameStatus').text("started");
     $('#totalTurns').text(game.turnsToFinish);
     this.timer = setInterval(function () {
@@ -238,15 +256,11 @@ var game = {
   },
   gameFinished : function() {
     clearInterval(this.timer);
-    if($('#race').has('div').length){
-      $('.alert').remove();
-    }
-    var alert = $('<div/>', {
-          role: 'alert',
-          text: 'Succes! You finished the game in ' + game.totalTime + ' seconds! The fastest Turn took ' + player.fastestTurn + " seconds! You reached " + player.score + " points!",
-          style: 'position: relative; top: 50px;'
-    }).addClass('alert').addClass('alert-success');
-     $('#race').append(alert);
+    $('#gameTime').text(game.totalTime);
+    $('#fastestTurn').text(player.fastestTurn);
+    $('#totalScore').text(player.score);
+    $('#gameFinished').modal();
+
     if(game.totalTime > this.timeHighScore){
       this.timeHighScore = game.totalTime;
     }
@@ -255,6 +269,7 @@ var game = {
       game.pointHighScore = player.score;
     }
     $('#gameStatus').text('finished');
+    helper.socket.emit('color', '#ffffff', 0); //white 
   }
 };
 
