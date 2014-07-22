@@ -1,28 +1,23 @@
 function handleOrientation(event) {
-	// var x = event.beta;
-	// var y = event.gamma;
-	// var z = event.alpha;
 
-	// var orientation = [event.alpha, event.beta, event.gamma];
+	var socket = io.connect();
 
-	var orientation = {};
-	orientation['alpha'] = event.alpha;
-	orientation['beta'] = event.beta;
-	orientation['gamma'] = event.gamma;
+	var z = event.alpha;
+	var x = event.beta;
+	var y = event.gamma;
 
+	var orientation = [x, y, z];
+	// var oriententation = ['0','0','0','0',x,'0',z];
 
-	document.getElementById("alpha").innerHTML = event.alpha;
-	document.getElementById("beta").innerHTML = event.beta;
-	document.getElementById("gamma").innerHTML = event.gamma;
+	// document.getElementById("x").innerHTML = x;
+	// document.getElementById("y").innerHTML = y;
 
+	// TODO: send proper light id
 	socket.emit('movement', orientation, 0);
 }
 
 
 window.onload = function() {
-	// TODO: remove global
-	socket = io.connect();
-
 	$.minicolors.defaults = $.extend($.minicolors.defaults, {
 		changeDelay: 0,
 		letterCase: 'uppercase',
@@ -33,6 +28,8 @@ window.onload = function() {
 
 	$('#colors').minicolors({
 		change: function(hex, opacity) {
+			var socket = io.connect();
+
 			// TODO: send proper light id
 			socket.emit('color', hex, 0);
 			//console.log(hex + ' - ' + opacity);
@@ -41,28 +38,32 @@ window.onload = function() {
 
 	$('#colors').minicolors();
 
+// Startfarbe
 
 	$('#colorsStart').minicolors({
+
 		change: function(hex, opacity) {
 
 			// hex zu HSL
 
 			var color = hexToHsl(hex);
+			//console.log(color);
+/*
+			var color2 = hexToRgb(hex);
+			console.log(color2);
+
+
+			var color3 = rgbToHsv(color2);
+			console.log(color3);
+			*/
 
 			startColor = color;
-
-			//console.log(color);		
-			//timeProgression();
-			
 		}
 	});
 
 	$('#colorsStart').minicolors();
 
-
-
-
-
+// Endfarbe
 
 	$('#colorsEnd').minicolors({
 		change: function(hex, opacity) {
@@ -71,19 +72,9 @@ window.onload = function() {
 			// hex zu HSL
 
 			var color = hexToHsl(hex);
+			//console.log(color);
 			
 			endColor = color;
-
-
-/*
-			console.log(color);
-			console.log(color2);*/
-
-			//timeProgression();			
-
-
-
-			//console.log(farbe);
 
 		}
 	});
@@ -102,7 +93,8 @@ window.onload = function() {
 	});
 
 	$('#btn-start-game').click(function() {
-		socket.emit('startShow');
+		// var socket = io.connect();
+		// socket.emit('startShow');
 	});
 
 	$('#btn-send-dmx').click(function() {
@@ -112,10 +104,12 @@ window.onload = function() {
 
 		data[channel] = value;
 
+		var socket = io.connect();
 		socket.emit('direct', data);
 	});
 
 	$('#btn-record').click(function() {
+		var socket = io.connect();
 		if ($(this).hasClass('btn-default')) {
 			$(this).addClass('btn-danger');
 			socket.emit('record', true);
@@ -169,9 +163,22 @@ window.onload = function() {
 		}
 	}
 	$('#btn-send-data').click(function() {
+		var socket = io.connect();
 		socket.emit('record', xData, yData);
 		// xData = [];
 		// yData = [];
 
-	})
+	});
+
+	 $( ".thumbnail" )
+	        .click(function() {
+	            $(this).find('.caption').removeClass("slideOutLeft").addClass("slideInLeft").show();
+	            $('.disabled').show();
+	});
+
+	if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+		$('#btn-send-position').show();
+	}else{
+		$('#btn-send-position').hide();
+	}
 }
