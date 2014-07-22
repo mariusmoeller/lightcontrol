@@ -19,18 +19,29 @@
 $('#methodList').change(function(){ 
   helper.method = $("#methodList")[0].selectedIndex ;
   if(helper.method >= 3){
-
-    $('.collapse').collapse();
     $('#labyrinthOptions').show();
-    if(helper.method == 4)
-      obstacles.init();
   }
 });
 
 $('#labConfDone').click(function(){
       labyrinth.init();
-      $('.collapse').collapse('hide');
+      $("body").children().hide();
+      $('#race').show();
 });
+
+$('#backButton').click(function(){
+    labyrinth.hide();
+});
+
+$('#back').click(function(){
+  $('#gameFinished').modal('hide');
+   labyrinth.hide();
+});
+
+$('#again').click(function(){
+  $('#gameFinished').modal('hide');
+  labyrinth.init();
+})
 
 $('#coordinates').click(function(){
   var i = $('#coordinatesInput').val();
@@ -48,7 +59,6 @@ $('#coordinates').click(function(){
   socket: io.connect(),
   method: 0,
   transform3D: function(x, y, z){
-    //console.log("x: " + x + " y: " + y + " z: " + z);
     var cX = 0;
     var cY = 1;
     var cZ = 0;
@@ -70,6 +80,8 @@ $('#coordinates').click(function(){
     beta += 25;
 
     var data = [alpha, beta];
+    $('#xPos').text(Math.round(alpha*100)/100);
+    $('#yPos').text(Math.round(beta*100)/100);
     return data;
   }
 };
@@ -88,80 +100,232 @@ var labyrinth = {
   zMin : 0,
 
   init: function(){
+    this.initButtons();
+    var median = 0;
+    for(var i=0;i<startLine.x.length;i++){
+      median+=startLine.x[i];
+    }
+    median /= startLine.x.length;
+    startLine.median = median;
+
     this.distance = parseInt($('#distance').val());
     this.washHeight = parseInt($('#washHeight').val());
     this.projectorHeight = parseInt($('#projectorHeight').val());
     this.screenHeight = parseInt($('#screenHeight').val());
     this.screenWidth = parseInt($('#screenWidth').val());
 
+    
     this.zMax = this.projectorHeight - this.washHeight + this.screenHeight;
     this.zMin = this.projectorHeight - this.washHeight;
     this.yMax = Math.round(this.screenWidth / 2);
     this.yMin = Math.round((-1) * this.screenWidth / 2);
 
-    this.currentY = Math.round((this.screenWidth / 2) * (-1) + 5);
-    this.currentZ = this.projectorHeight - this.washHeight + this.screenHeight;
+    //start line
+    this.currentY = this.yMin + startLine.median;
+    this.currentZ = this.zMax - startLine.y;
 
     this.sendPosition();
     helper.socket.emit('color', '#00ff00', 0);
+    player.reset();
+    $('#gameStatus').text("not yet started");
+    $('#time').text("0");
+    $('#totalTurns').text("0");
+  },
+
+  hide: function(){
+    $("body").children().show();
+    $('#race').hide();
   },
 
   move: function(direction){
-    switch(direction){
-      case "forward" :   this.currentZ++;  break;
-      case "backward" :  this.currentZ--; break;
-      case "right" : this.currentY++; break;
-      case "left" : this.currentY--; break;
+    player.moves++;
+    if(player.moves == 1){
+      game.startGame();
     }
-    this.sendPosition();
+    var y = this.currentY;
+    var z = this.currentZ;
+    switch(direction){
+      case "forward" :   z++;  break;
+      case "backward" :  z--; break;
+      case "right" : y++; break;
+      case "left" : y--; break;
+    }
 
-    if(this.currentZ > this.zMax || this.currentZ < this.zMin || this.currentY > this.yMax || this.currentY < this.yMin)
+    if(z > this.zMax || z < this.zMin || y > this.yMax || y < this.yMin){
+      console.log("aus dem Feld raus");
       helper.socket.emit('color', '#ff0000', 0); //red
-    else
+    }else{
       helper.socket.emit('color', '#00ff00', 0); //green
+      var obstaclesImWeg = this.checkObstacles(y, z);
+      if(!obstaclesImWeg){
+        this.currentY = y;
+        this.currentZ = z;
+        this.sendPosition();
 
-    if(helper.method == 4){
-      for(var i=0;i<obstacles.positions.length;i++){
-        var p = obstacles.positions[i];
-        if(this.currentY == p[0] && this.currentZ == p[1])
-          helper.socket.emit('color', '#000ff', 0);
-      }
+        var startLineImWeg = this.checkStartLine();
+        if(startLineImWeg){
+          console.log("start linie im weg");
+          game.turnFinished();
+          helper.socket.emit('color', '#ffff00', 0); //yellow
+        }
+       }else{
+          console.log("crash");
+          player.obstaclesCrashed++;
+          player.updateScore();
+          helper.socket.emit('color', '#0000ff', 0); //blue
+       }
     }
   },
 
   sendPosition: function(){
     helper.socket.emit('setPosByDegrees', helper.transform3D(this.distance, this.currentY, this.currentZ), 0);
-  }
-};
+  },
 
-var obstacles = {
-  positions : [],
-  init : function() {
-    var yLeftBorder = -108;
-    var yRightBorder = 108;
-
-    var zMax1 = 140;
-    var zMin1 = 136;
-
-    var zMax2 = 90;
-    var zMin2 = 86;
-
-    var yStop1 = 32;
-    var yStop2 = -34;
-
-    for(var y=yLeftBorder;y<yRightBorder;y++){
-      for(var z=zMax1;z>zMin2;z--){
-        var pos = [y, z];
-        if(z  >=zMin1 && z <= zMax1)
-          if(y < yStop1)
-            this.positions.push(pos);
-        if(z  >=zMin2 && z <= zMax2)
-          if(y > -yStop2)
-            this.positions.push(pos);
+  checkObstacles: function(y, z){
+    var xInArray = Math.round(this.yMax + y);
+    var yInArray = Math.round(this.zMax - z);
+    if(obstaclesFromFile[yInArray]){
+      if(obstaclesFromFile[yInArray][xInArray]){
+        return true;
       }
     }
+      return false;
+    },
+
+    checkStartLine: function() {
+      var xInArray = this.currentY + Math.round(this.screenWidth/2);
+      var yInArray = this.zMax - this.currentZ;
+      if(yInArray == startLine.y){
+        if(xInArray >= startLine.x[0] && xInArray <= startLine.x[startLine.x.length-1]){
+          return true;
+        }
+      }
+      return false; 
+    },
+    initButtons: function() {
+      $('#hoch').click(function(){labyrinth.move("backward")});      
+      $('#runter').click(function(){labyrinth.move("forward")});
+      $('#rechts').click(function(){labyrinth.move("right")});
+      $('#links').click(function(){labyrinth.move("left")});
+    }
+};
+
+var game = {
+  turnsToFinish : 2,
+  timeHighScore : 0,
+  pointHighScore : 0,
+  totalTime : 0,
+  turnTime : 0,
+  timer : null,
+  showStatus : function(seconds) {
+    if($('#race').has('div').length){
+      $('.alert').remove();
+    }
+    var alert = $('<div/>', {
+          role: 'alert',
+          text: 'Succes! You finished one turn in ' + seconds + ' seconds!',
+          style: 'position: relative; top: 50px;'
+    }).addClass('alert').addClass('alert-success');
+    $('#race').append(alert);
+
+    setTimeout(function() {
+        $('.alert').fadeOut('slow');
+    }, 2000); 
+  },
+  startGame : function() {
+    this.turnsToFinish = 2;
+    this.totalTime = 0;
+    this.turnTime = 0;
+    this.timer = null;
+    $('#gameStatus').text("started");
+    $('#totalTurns').text(game.turnsToFinish);
+    this.timer = setInterval(function () {
+        game.totalTime++;
+        game.turnTime++;
+        $('#time').text(game.totalTime);
+        player.updateScore();
+    }, 1000);
+  },
+  turnFinished : function() {
+    var timeForRound = this.turnTime;
+    this.showStatus(timeForRound);
+    if(timeForRound > player.fastestTurn){
+      player.fastestTurn = timeForRound;
+    }
+    player.turnsFinished++;
+    $('#absolvedTurns').text(player.turnsFinished);
+    if(player.turnsFinished == this.turnsToFinish){
+      this.gameFinished();
+    }
+    this.turnTime = 0;
+  },
+  gameFinished : function() {
+    clearInterval(this.timer);
+    $('#gameTime').text(game.totalTime);
+    $('#fastestTurn').text(player.fastestTurn);
+    $('#totalScore').text(player.score);
+    $('#gameFinished').modal();
+
+    if(game.totalTime > this.timeHighScore){
+      this.timeHighScore = game.totalTime;
+    }
+    if(game.pointHighScore > player.score){
+      alert("Highscore");
+      game.pointHighScore = player.score;
+    }
+    $('#gameStatus').text('finished');
+    helper.socket.emit('color', '#ffffff', 0); //white 
   }
 };
+
+var player = {
+  turnsFinished : 0,
+  score : 0,
+  moves : 0,
+  obstaclesCrashed : 0,
+  fastestTurn: 0,
+  reset : function() {
+    this.turnsFinished = 0;
+    this.score = 0;
+    this.moves = 0;
+    this.obstaclesCrashed = 0;
+    $('#score').text(this.score);
+    $('#absolvedTurns').text(player.turnsFinished);
+  },
+  updateScore : function() {
+    this.score = Math.round((this.moves - this.obstaclesCrashed / this.moves ) * (1 / game.totalTime)* 50);
+    $('#score').text(this.score);
+  }
+};
+
+// var obstacles = {
+//   positions : [],
+//   init : function() {
+//     var yLeftBorder = -108;
+//     var yRightBorder = 108;
+
+//     var zMax1 = 140;
+//     var zMin1 = 136;
+
+//     var zMax2 = 90;
+//     var zMin2 = 86;
+
+//     var yStop1 = 32;
+//     var yStop2 = -34;
+
+//     for(var y=yLeftBorder;y<yRightBorder;y++){
+//       for(var z=zMax1;z>zMin2;z--){
+//         var pos = [y, z];
+//         if(z  >=zMin1 && z <= zMax1)
+//           if(y < yStop1)
+//             this.positions.push(pos);
+//         if(z  >=zMin2 && z <= zMax2)
+//           if(y > -yStop2)
+//             this.positions.push(pos);
+//       }
+//     }
+//   }
+// };
 
 var controller = {
   // If the number exceeds this in any way, we treat the label as active
@@ -278,11 +442,10 @@ var controller = {
   buttonPressed: function(id) {
     var orientations = [
                   // A    B   X   Y
-                  ["backward", "right", "left", "forward"], //method 0
-                  [],                                                                     //method 1
-                  ["forward", "backward", 0, 0],                   //method 2
-                  ["backward", "right", "left", "forward"] ,  //method 3 -- labyrinth
-                  ["backward", "right", "left", "forward"]    //method 4 -- labyrinth
+                  ["backward", "right", "left", "forward"],    //method 0
+                  [],                                                      //method 1
+                  ["forward", "backward", 0, 0],              //method 2
+                  ["backward", "right", "left", "forward"]    //method 3 -- labyrinth
     ];
     var o = orientations[helper.method][id-1];
     if(o)

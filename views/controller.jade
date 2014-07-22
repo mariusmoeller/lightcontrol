@@ -3,6 +3,7 @@ extends layout
 append javascript
   script(src='/javascripts/gamepad.js')
   script(src='/javascripts/controller.js')
+  script(src='/javascripts/obstacles.js')
   script.
     controller.init();
     gamepadSupport.init();
@@ -16,7 +17,6 @@ block content
         option Shoulder / Stick 1
         option Buttons / Stick 1
         option Labyrinth
-        option Labyrinth with Obstacles
       .col-lg-3
         .input-group
           input#coordinatesInput.form-control(type='text', placeholder='Enter coordinates')
@@ -29,25 +29,74 @@ block content
                 div.panel-heading
                   h4.panel-title
                     a(data-toggle='collapse', data-parent='#accordion', href='#collapseOne') Configuration
-                  button#labConfDone.btn.btn-default(type='button') Done
+                  a#labConfDone.btn.btn-default(type='button') Done
                 div#collapseOne.panel-collapse.collapse.in
                   div.panel-body
                     form(role='form')
                     .form-group
                       label(for='distance') Distance
-                      input#distance.form-control(type='text', placeholder='Enter Distance in cm', value='450')
+                      input#distance.form-control(type='text', placeholder='Enter Distance in cm', value='205')
                     .form-group
                       label(for='washHeight') Wash Height
-                      input#washHeight.form-control(type='text', placeholder='Enter  Height of Wash in cm', value='78')
+                      input#washHeight.form-control(type='text', placeholder='Enter  Height of Wash in cm', value='0')
                     .form-group
                       label(for='projectorHeight') Projector Height
-                      input#projectorHeight.form-control(type='text', placeholder='Enter Height of Projector in cm', value ='112')
+                      input#projectorHeight.form-control(type='text', placeholder='Enter Height of Projector in cm', value ='55')
                     .form-group
                       label(for='screenWidth') Screen Width
-                      input#screenWidth.form-control(type='text', placeholder='Enter Width of Screen in cm', value='215')
+                      input#screenWidth.form-control(type='text', placeholder='Enter Width of Screen in cm', value='272')
                     .form-group
                       label(for='screenHeight') Screen Height
-                      input#screenHeight.form-control(type='text', placeholder='Enter Height of Screen in cm', value='155')
+                      input#screenHeight.form-control(type='text', placeholder='Enter Height of Screen in cm', value='166')
+  div#race
+   img.bg(src='img/strecke.jpg')
+   button#backButton.btn.btn-default.btn-lg.btn-block Back
+   div.panel.panel-info#game
+    div.panel-heading Game Information
+    div.panel-body
+      .btn-group
+        button#hoch.btn.btn-default(type='button') Hoch
+        button#runter.btn.btn-default(type='button') Runter
+        button#rechts.btn.btn-default(type='button') Rechts
+        button#links.btn.btn-default(type='button') Links
+      p
+        | Position: 
+        span#xPos 0
+        | | 
+        span#yPos 0 
+      p
+        | Game 
+        span#gameStatus not started
+      p
+        | Turns: 
+        span#absolvedTurns 0
+        | /
+        span#totalTurns 5
+      p
+        | Score: 
+        span#score 0
+        |  Points
+      p
+        span#time 0
+        |  seconds
+  #gameFinished.modal.fade(tabindex='-1', role='dialog', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-body
+          | You finished the Game in 
+          span#gameTime 12387
+          |  seconds!
+          br
+          | Your fastest turn took 
+          span#fastestTurn 11
+          |  seconds! 
+          br
+          | You reached 
+          span#totalScore 0
+          |  points!
+        .modal-footer
+          button#again.btn.btn-default(type='button', data-dismiss='modal') Try Again
+          button#back.btn.btn-primary(type='button') Back to App
   ul#gamepads
    li.template
     .buttons

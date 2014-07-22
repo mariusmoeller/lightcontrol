@@ -34,7 +34,6 @@ MovingHead.prototype.setPos = function(pan, tilt) {
     var data = {};
     data[this.conf.pan.channel] = limitRange(pan);
     data[this.conf.tilt.channel] = limitRange(tilt);
-
     console.log(data);
 
     this.artnet.send(data);
