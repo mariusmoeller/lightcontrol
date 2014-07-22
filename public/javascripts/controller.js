@@ -171,7 +171,7 @@ var labyrinth = {
        }else{
           console.log("crash");
           player.obstaclesCrashed++;
-          player.updateScore();
+      //  player.updateScore();
           helper.socket.emit('color', '#0000ff', 0); //blue
        }
     }
@@ -211,7 +211,7 @@ var labyrinth = {
 };
 
 var game = {
-  turnsToFinish : 2,
+  turnsToFinish : 3,
   timeHighScore : 0,
   pointHighScore : 0,
   totalTime : 0,
@@ -233,7 +233,7 @@ var game = {
     }, 2000); 
   },
   startGame : function() {
-    this.turnsToFinish = 2;
+    this.turnsToFinish = 3;
     this.totalTime = 0;
     this.turnTime = 0;
     this.timer = null;
@@ -248,13 +248,16 @@ var game = {
   },
   turnFinished : function() {
     var timeForRound = this.turnTime;
-    this.showStatus(timeForRound);
-    if(timeForRound > player.fastestTurn){
+    player.turnsFinished++;
+    if(player.turnsFinished < game.turnsToFinish){
+      this.showStatus(timeForRound);
+    }
+    if(player.fastestTurn > timeForRound){
       player.fastestTurn = timeForRound;
     }
-    player.turnsFinished++;
+   
     $('#absolvedTurns').text(player.turnsFinished);
-    if(player.turnsFinished == this.turnsToFinish){
+    if(player.turnsFinished == game.turnsToFinish){
       this.gameFinished();
     }
     this.turnTime = 0;
@@ -269,7 +272,7 @@ var game = {
     if(game.totalTime > this.timeHighScore){
       this.timeHighScore = game.totalTime;
     }
-    if(game.pointHighScore > player.score){
+    if(player.score > game.pointHighScore){
       alert("Highscore");
       game.pointHighScore = player.score;
     }
