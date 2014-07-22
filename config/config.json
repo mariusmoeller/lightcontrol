@@ -32,6 +32,11 @@
       "tilt": {
         "channel": 2,
         "max": 265
+      },
+      "strobo": {
+        "channel": 8,
+        "min": 64,
+        "max": 95
       }
     }
   }

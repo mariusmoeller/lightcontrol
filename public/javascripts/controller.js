@@ -20,12 +20,18 @@ $('#methodList').change(function(){
   helper.method = $("#methodList")[0].selectedIndex ;
   if(helper.method >= 3){
     $('#labyrinthOptions').show();
+    if(helper.method == 3){
+      labyrinth.mode = "easy";
+    }else{
+      labyrinth.mode = "difficult";
+    }
   }
 });
 
 $('#labConfDone').click(function(){
       labyrinth.init();
       $("body").children().hide();
+      $('.bg').attr("src","img/route-" + labyrinth.mode + ".jpg");
       $('#race').show();
 });
 
@@ -87,6 +93,7 @@ $('#coordinates').click(function(){
 };
 
 var labyrinth = {
+  mode : "",
   washHeight : 0,
   projectorHeight: 0,
   screenHeight : 0,
@@ -102,6 +109,7 @@ var labyrinth = {
   init: function(){
     this.initButtons();
     var median = 0;
+    var startLine = window[labyrinth.mode + "StartLine"];
     for(var i=0;i<startLine.x.length;i++){
       median+=startLine.x[i];
     }
@@ -171,7 +179,7 @@ var labyrinth = {
        }else{
           console.log("crash");
           player.obstaclesCrashed++;
-          player.updateScore();
+      //  player.updateScore();
           helper.socket.emit('color', '#0000ff', 0); //blue
        }
     }
@@ -184,8 +192,9 @@ var labyrinth = {
   checkObstacles: function(y, z){
     var xInArray = Math.round(this.yMax + y);
     var yInArray = Math.round(this.zMax - z);
-    if(obstaclesFromFile[yInArray]){
-      if(obstaclesFromFile[yInArray][xInArray]){
+    var obstacles = window[labyrinth.mode + "Obstacles"];
+    if(obstacles[yInArray]){
+      if(obstacles[yInArray][xInArray]){
         return true;
       }
     }
@@ -195,6 +204,7 @@ var labyrinth = {
     checkStartLine: function() {
       var xInArray = this.currentY + Math.round(this.screenWidth/2);
       var yInArray = this.zMax - this.currentZ;
+      var startLine = window[labyrinth.mode + "StartLine"];
       if(yInArray == startLine.y){
         if(xInArray >= startLine.x[0] && xInArray <= startLine.x[startLine.x.length-1]){
           return true;
@@ -211,7 +221,7 @@ var labyrinth = {
 };
 
 var game = {
-  turnsToFinish : 2,
+  turnsToFinish : 3,
   timeHighScore : 0,
   pointHighScore : 0,
   totalTime : 0,
@@ -233,7 +243,7 @@ var game = {
     }, 2000); 
   },
   startGame : function() {
-    this.turnsToFinish = 2;
+    this.turnsToFinish = 3;
     this.totalTime = 0;
     this.turnTime = 0;
     this.timer = null;
@@ -248,13 +258,16 @@ var game = {
   },
   turnFinished : function() {
     var timeForRound = this.turnTime;
-    this.showStatus(timeForRound);
-    if(timeForRound > player.fastestTurn){
+    player.turnsFinished++;
+    if(player.turnsFinished < game.turnsToFinish){
+      this.showStatus(timeForRound);
+    }
+    if(player.fastestTurn > timeForRound){
       player.fastestTurn = timeForRound;
     }
-    player.turnsFinished++;
+   
     $('#absolvedTurns').text(player.turnsFinished);
-    if(player.turnsFinished == this.turnsToFinish){
+    if(player.turnsFinished == game.turnsToFinish){
       this.gameFinished();
     }
     this.turnTime = 0;
@@ -269,7 +282,7 @@ var game = {
     if(game.totalTime > this.timeHighScore){
       this.timeHighScore = game.totalTime;
     }
-    if(game.pointHighScore > player.score){
+    if(player.score > game.pointHighScore){
       alert("Highscore");
       game.pointHighScore = player.score;
     }
