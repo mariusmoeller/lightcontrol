@@ -21,12 +21,45 @@ $('#methodList').change(function(){
 });
 
 $('.thumbnail').click(function(){
-  labyrinth.mode = this.childNodes[0].name;
+  var mode = this.childNodes[0].name;
+  labyrinth.mode = mode;
   helper.method = 3;
-  $('#labyrinthOptions').show();
-})
+  $('#selLab').attr("src", "img/"+mode+"-thumbnail.jpg");
+  $('#mode').text(mode).css('textTransform', 'capitalize');
+  createTBody(mode);
 
-$('#labConfDone').click(function(){
+  $('#pongInfo').removeClass('fadeInUp').addClass('animated fadeOutUp')
+                 .one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function(){
+    $(this).hide();
+    $('#selectedLabyrinth').removeClass('fadeOutUp').addClass('animated fadeInUp').show();
+  });
+  
+});
+
+function createTBody(mode){
+  $('#highscoreTable').children('tbody').remove();
+  var tbody = $('<tbody/>');
+  var scores = highscore[mode];
+  for(var i=0;i<scores.length;i++){
+    var row = $('<tr/>').append(
+      $('<td/>',{
+        text: i+1
+      })
+    ).append(
+      $('<td/>',{
+        text: scores[i].name
+      })
+    ).append(
+      $('<td/>',{
+        text: scores[i].score
+      })
+    );
+    row.appendTo(tbody);
+  }
+  tbody.appendTo($('#highscoreTable'));
+}
+
+$('#startGame').click(function(){
       labyrinth.init();
       $("body").children().hide();
       $('.bg').attr("src","img/route-" + labyrinth.mode + ".jpg");
@@ -46,7 +79,15 @@ $('#back').click(function(){
 $('#again').click(function(){
   $('#gameFinished').modal('hide');
   labyrinth.init();
-})
+});
+
+$('#allLabs').click(function(){
+  $('#selectedLabyrinth').removeClass('fadeInUp').addClass('animated fadeOutUp')
+                 .one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function(){
+    $(this).hide();
+    $('#pongInfo').removeClass('fadeOutUp').addClass('animated fadeInUp').show();
+  });
+});
 
 $('#coordinates').click(function(){
   var i = $('#coordinatesInput').val();

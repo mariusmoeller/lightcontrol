@@ -13,7 +13,7 @@ a {
 }
 
 img {
-    position: absolute;
+    position: relative;
     margin: auto;
     top: 0;
     left: 0;
@@ -50,16 +50,6 @@ input[type=range] {
     text-align: center;
     font-size: 18pt;
 
-}
-.thumbnail {
-    position: absolute;
-    top: 15px;
-    bottom: 0;
-    left: 15px;
-    right: 0;
-    text-align:center;
-    padding-top:calc(50% - 30px);
-    background-color: #eee !important;
 }
 
 .caption {
@@ -108,12 +98,28 @@ input[type=range] {
 
 .extremeLab > #score {
     position:  relative;
-    top: -7em;
+    bottom: 7em;
     left: 35%;
 }
 
+.hardLab > #time {
+    position: fixed;
+    right: 5px;
+    bottom: 5px;
+    width: 12%;
+}
+
+.hardLab > #score {
+    position: fixed;
+    right: 5px;
+    top: 5px;
+}
+
 #labyrinthOptions {
-    top: 12em;
-    position: relative;
     color: white;
+    margin-top: 3em;
+}
+
+#btns {
+    top: 1em;
 }
