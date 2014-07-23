@@ -18,14 +18,6 @@
  */
 $('#methodList').change(function(){ 
   helper.method = $("#methodList")[0].selectedIndex ;
-  /*if(helper.method >= 3){
-    $('#labyrinthOptions').show();
-    if(helper.method == 3){
-      labyrinth.mode = "easy";
-    }else{
-      labyrinth.mode = "difficult";
-    }
-  }*/
 });
 
 $('.thumbnail').click(function(){
@@ -142,6 +134,8 @@ var labyrinth = {
   },
 
   hide: function(){
+    game.gameFinished(false);
+    $('.game-information').removeClass(labyrinth.mode + 'Lab');
     $("body").children().show();
     $('#race').hide();
     $('#gamepads').hide();
@@ -271,26 +265,28 @@ var game = {
    
     $('#absolvedTurns').text(player.turnsFinished);
     if(player.turnsFinished == game.turnsToFinish){
-      this.gameFinished();
+      this.gameFinished(true);
     }
     this.turnTime = 0;
   },
-  gameFinished : function() {
+  gameFinished : function(done) {
     clearInterval(this.timer);
-    $('#gameTime').text(game.totalTime);
-    $('#fastestTurn').text(player.fastestTurn);
-    $('#totalScore').text(player.score);
-    $('#gameFinished').modal();
+    if(done){
+      $('#gameTime').text(game.totalTime);
+      $('#fastestTurn').text(player.fastestTurn);
+      $('#totalScore').text(player.score);
+      $('#gameFinished').modal();
 
-    if(game.totalTime > this.timeHighScore){
-      this.timeHighScore = game.totalTime;
+      if(game.totalTime > this.timeHighScore){
+        this.timeHighScore = game.totalTime;
+      }
+      if(player.score > game.pointHighScore){
+        alert("Highscore");
+        game.pointHighScore = player.score;
+      }
+      $('#gameStatus').text('finished');
+      helper.socket.emit('color', '#ffffff', 0); //white 
     }
-    if(player.score > game.pointHighScore){
-      alert("Highscore");
-      game.pointHighScore = player.score;
-    }
-    $('#gameStatus').text('finished');
-    helper.socket.emit('color', '#ffffff', 0); //white 
   }
 };
 
@@ -313,35 +309,6 @@ var player = {
     $('#score').text(this.score + " Points");
   }
 };
-
-// var obstacles = {
-//   positions : [],
-//   init : function() {
-//     var yLeftBorder = -108;
-//     var yRightBorder = 108;
-
-//     var zMax1 = 140;
-//     var zMin1 = 136;
-
-//     var zMax2 = 90;
-//     var zMin2 = 86;
-
-//     var yStop1 = 32;
-//     var yStop2 = -34;
-
-//     for(var y=yLeftBorder;y<yRightBorder;y++){
-//       for(var z=zMax1;z>zMin2;z--){
-//         var pos = [y, z];
-//         if(z  >=zMin1 && z <= zMax1)
-//           if(y < yStop1)
-//             this.positions.push(pos);
-//         if(z  >=zMin2 && z <= zMax2)
-//           if(y > -yStop2)
-//             this.positions.push(pos);
-//       }
-//     }
-//   }
-// };
 
 var controller = {
   // If the number exceeds this in any way, we treat the label as active

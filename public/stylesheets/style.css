@@ -100,13 +100,13 @@ input[type=range] {
     top: 1.5em;
 }
 
-.difficultLab > #time {
+.extremeLab > #time {
     left: 12%;
     top: 3em;
     position: relative;
 }
 
-.difficultLab > #score {
+.extremeLab > #score {
     position:  relative;
     top: -7em;
     left: 35%;
