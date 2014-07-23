@@ -7,6 +7,27 @@ append javascript
     controller.init();
     gamepadSupport.init();
 block content
+  ul#gamepads(style="display:none")
+   li.template
+    .buttons
+      .face(name='button-1')
+      .face(name='button-2')
+      .face(name='button-3')
+      .face(name='button-4')
+      .top-shoulder(name='button-left-shoulder-top')
+      .top-shoulder(name='button-right-shoulder-top')
+      .bottom-shoulder(name='button-left-shoulder-bottom')
+      .bottom-shoulder(name='button-right-shoulder-bottom')
+      .select-start(name='button-select')
+      .select-start(name='button-start')
+      .stick(name='stick-1')
+      .stick(name='stick-2')
+      .face(name='button-dpad-top')
+      .face(name='button-dpad-bottom')
+      .face(name='button-dpad-left')
+      .face(name='button-dpad-right')
+    .index
+    marquee.name(scrolldelay='50', scrollamount='2')
   .container
     .row
       .col-md-9.col-md-offset-1.top-space

@@ -115,13 +115,6 @@ var labyrinth = {
 
   init: function(){
     this.initButtons();
-    var median = 0;
-    var startLine = window[labyrinth.mode + "StartLine"];
-    for(var i=0;i<startLine.x.length;i++){
-      median+=startLine.x[i];
-    }
-    median /= startLine.x.length;
-    startLine.median = median;
 
     this.distance = parseInt($('#distance').val());
     this.washHeight = parseInt($('#washHeight').val());
@@ -136,7 +129,8 @@ var labyrinth = {
     this.yMin = Math.round((-1) * this.screenWidth / 2);
 
     //start line
-    this.currentY = this.yMin + startLine.median;
+    var startLine = window[labyrinth.mode + "StartLine"];
+    this.currentY = this.yMin + startLine.xStart + Math.round((startLine.xEnd - startLine.xStart / 2));
     this.currentZ = this.zMax - startLine.y;
 
     this.sendPosition();
@@ -150,6 +144,8 @@ var labyrinth = {
   hide: function(){
     $("body").children().show();
     $('#race').hide();
+    $('#gamepads').hide();
+    $('#gameFinished').hide();
   },
 
   move: function(direction){
@@ -213,7 +209,7 @@ var labyrinth = {
       var yInArray = this.zMax - this.currentZ;
       var startLine = window[labyrinth.mode + "StartLine"];
       if(yInArray == startLine.y){
-        if(xInArray >= startLine.x[0] && xInArray <= startLine.x[startLine.x.length-1]){
+        if(xInArray >= startLine.xStart && xInArray <= startLine.xEnd){
           return true;
         }
       }
@@ -373,9 +369,8 @@ var controller = {
     var el = document.createElement('li');
 
     // Copy from the template.
-    el.innerHTML =
-    document.querySelector('#gamepads > .template').innerHTML;
-
+    el.innerHTML = document.querySelector('#gamepads > .template').innerHTML;
+  
     el.id = 'gamepad-0';
     el.querySelector('.name').innerHTML =  "Lightcontrol IMI 2014"; //gamepad.id ||
     el.querySelector('.index').innerHTML = 0; //gamepad.iid
