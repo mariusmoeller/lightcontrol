@@ -712,3 +712,7 @@ img.bg {
 .modal-content {
   background-color: #333 !important;
 }
+
+#game > #collapse > .panel-body > p {
+  color: #31708F;
+}
