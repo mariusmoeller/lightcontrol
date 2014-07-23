@@ -4,10 +4,11 @@ html
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
     link(rel='stylesheet', href='/stylesheets/controller.css')
+    link(rel='stylesheet', href='/lib/animate.css')
 
     script(src='/lib/jquery-2.1.1.js')
     script(src='/socket.io/socket.io.js')
-
+    
     link(rel='stylesheet', href='/lib/bootstrap/css/bootstrap.min.css')
     script(src='/lib/bootstrap/js/bootstrap.min.js')
 
@@ -37,9 +38,10 @@ html
         // Collect the nav links, forms, and other content for toggling
         #bs-example-navbar-collapse-1.collapse.navbar-collapse
           ul.nav.navbar-nav
-            each device in devices
-              li.active
-                a(href='#')= device.conf.name
+            li.active
+              a(href='#') Moving Head 1
+            li
+              a(href='#') Moving Head 2
             li.dropdown
               a.dropdown-toggle(href='#', data-toggle='dropdown')
                 | Washs

@@ -3,24 +3,30 @@ extends layout
 block content
   .container
     .row
-      .col-md-8.top-space
-        div.jumbotron
-         h3 Pong
-         p This is a funny game, go to position and press start. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea
-       .col-md-4.top-space
-        div.jumbotron
-          div#start-window
-            img(src="/img/pong.png")(style="position:relative;width:100%;border-radius:90px")
-            input(type='text', placeholder='player 1')#user-1.user-input
-            input(type='text', placeholder='player 2')#user-2.user-input
-            a(href='#')#btn-start-game.btn.btn-default.btn-lg.btn-block Start Game
-          div#game-info
-    .row
-      .col-md-12.top-space
-       a(href='/')#btn-back.btn.btn-default.btn-lg.btn-block Back
-
-    a(href='#')#update-points Test Fuction
-
+      .col-md-9.col-md-offset-1.top-space
+        .jumbotron
+         h2 Pong
+         div.infoText Use your right hand to hit the Ball!
+         img#pongLogo(src="/img/pong.png")(style="position:relative;width:60%;left:20%;border-radius:90px")
+         button#update-points.btn.btn-success(type="button", style="display:none;") Test
+         div#game-info
+        .row#playerMode 
+          .col-md-6
+            .thumbnail
+             .caption.animated
+              label(for="player1") Name Player 1
+              input.form-control(type='text', placeholder='Name Player 1 ', autofocus='autofocus', id='player1')
+              a(href='#', name="1player").btn-start-game.btn.btn-default.btn-lg.btn-block Start Game
+             img(src='img/1player.jpg')
+           .col-md-6
+              .thumbnail
+               .caption.animated
+                 label(for="player1") Name Player 1
+                 input.form-control(type='text', placeholder='Name Player 1 ', autofocus='autofocus', id='player1')
+                 label(for="player2") Name Player 2
+                 input.form-control(type='text', placeholder='Name Player 2 ', autofocus='autofocus', id='player2')
+                 a(href='#', name="2player").btn-start-game.btn.btn-default.btn-lg.btn-block Start Game
+               img(src='img/2player.jpg')
  append javascript
     script(src='/lib/pong/mespeak.js')
     script(src='/javascripts/pong.js')
