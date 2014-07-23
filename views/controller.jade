@@ -16,7 +16,8 @@ block content
         option Buttons / Stick 1 / Stick 2
         option Shoulder / Stick 1
         option Buttons / Stick 1
-        option Labyrinth
+        option Labyrinth Simple
+        option Labyrinth Difficult
       .col-lg-3
         .input-group
           input#coordinatesInput.form-control(type='text', placeholder='Enter coordinates')
@@ -49,36 +50,40 @@ block content
                       label(for='screenHeight') Screen Height
                       input#screenHeight.form-control(type='text', placeholder='Enter Height of Screen in cm', value='166')
   div#race
-   img.bg(src='img/strecke.jpg')
+   img.bg
    button#backButton.btn.btn-default.btn-lg.btn-block Back
-   div.panel.panel-info#game
-    div.panel-heading Game Information
-    div.panel-body
-      .btn-group
-        button#hoch.btn.btn-default(type='button') Hoch
-        button#runter.btn.btn-default(type='button') Runter
-        button#rechts.btn.btn-default(type='button') Rechts
-        button#links.btn.btn-default(type='button') Links
-      p
-        | Position: 
-        span#xPos 0
-        | | 
-        span#yPos 0 
-      p
-        | Game 
-        span#gameStatus not started
-      p
-        | Turns: 
-        span#absolvedTurns 0
-        | /
-        span#totalTurns 5
-      p
-        | Score: 
-        span#score 0
-        |  Points
-      p
-        span#time 0
-        |  seconds
+   div.panel-group#accordion
+     div.panel.panel-info#game
+       div.panel-heading
+        h4.panel-title
+          a(data-toggle='collapse', data-parent='#accordion', href='#collapse') Game Information
+       div#collapse.panel-collapse.collapse.in
+        div.panel-body
+          .btn-group
+            button#hoch.btn.btn-default(type='button') Hoch
+            button#runter.btn.btn-default(type='button') Runter
+            button#rechts.btn.btn-default(type='button') Rechts
+            button#links.btn.btn-default(type='button') Links
+          p
+            | Position: 
+            span#xPos 0
+            | | 
+            span#yPos 0 
+          p
+            | Game 
+            span#gameStatus not started
+          p
+            | Turns: 
+            span#absolvedTurns 0
+            | /
+            span#totalTurns 5
+          p
+            | Score: 
+            span#score 0
+            |  Points
+          p
+            span#time 0
+            |  seconds
   #gameFinished.modal.fade(tabindex='-1', role='dialog', aria-hidden='true')
     .modal-dialog
       .modal-content
