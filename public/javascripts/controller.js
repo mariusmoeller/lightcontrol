@@ -72,6 +72,14 @@ $('#backButton').click(function(){
 });
 
 $('#back').click(function(){
+  if($('#highscore').css('display') == "block"){
+    var o = {
+      "name": $('#player').val(),
+      "score": game.pointHighScore
+    };
+    highscore[labyrinth.mode].add(o);
+    helper.sortHighscore();
+  }
   $('#gameFinished').modal('hide');
    labyrinth.hide();
 });
@@ -126,9 +134,10 @@ $('#coordinates').click(function(){
     beta += 25;
 
     var data = [alpha, beta];
-    $('#xPos').text(Math.round(alpha*100)/100);
-    $('#yPos').text(Math.round(beta*100)/100);
     return data;
+  },
+  orderHighscore: function(){
+    
   }
 };
 
@@ -147,8 +156,6 @@ var labyrinth = {
   zMin : 0,
 
   init: function(){
-    this.initButtons();
-
     this.distance = parseInt($('#distance').val());
     this.washHeight = parseInt($('#washHeight').val());
     this.projectorHeight = parseInt($('#projectorHeight').val());
@@ -169,9 +176,7 @@ var labyrinth = {
     this.sendPosition();
     helper.socket.emit('color', '#00ff00', 0);
     player.reset();
-    $('#gameStatus').text("not yet started");
     $('#time').text("");
-    $('#totalTurns').text("0");
   },
 
   hide: function(){
@@ -249,12 +254,6 @@ var labyrinth = {
         }
       }
       return false; 
-    },
-    initButtons: function() {
-      $('#hoch').click(function(){labyrinth.move("backward")});      
-      $('#runter').click(function(){labyrinth.move("forward")});
-      $('#rechts').click(function(){labyrinth.move("right")});
-      $('#links').click(function(){labyrinth.move("left")});
     }
 };
 
@@ -285,8 +284,6 @@ var game = {
     this.totalTime = 0;
     this.turnTime = 0;
     this.timer = null;
-    $('#gameStatus').text("started");
-    $('#totalTurns').text(game.turnsToFinish);
     this.timer = setInterval(function () {
         game.totalTime++;
         game.turnTime++;
@@ -303,8 +300,6 @@ var game = {
     if(player.fastestTurn > timeForRound){
       player.fastestTurn = timeForRound;
     }
-   
-    $('#absolvedTurns').text(player.turnsFinished);
     if(player.turnsFinished == game.turnsToFinish){
       this.gameFinished(true);
     }
@@ -322,10 +317,13 @@ var game = {
         this.timeHighScore = game.totalTime;
       }
       if(player.score > game.pointHighScore){
-        alert("Highscore");
         game.pointHighScore = player.score;
+        $('#player').css('display', 'inline');
+        $('#highscore').show();
+      }else{
+        $('#player').hide();
+        $('#highscore').hide();
       }
-      $('#gameStatus').text('finished');
       helper.socket.emit('color', '#ffffff', 0); //white 
     }
   }
@@ -343,7 +341,6 @@ var player = {
     this.moves = 0;
     this.obstaclesCrashed = 0;
     $('#score').text("");
-    $('#absolvedTurns').text(player.turnsFinished);
   },
   updateScore : function() {
     this.score = Math.round((this.moves - this.obstaclesCrashed / this.moves ) * (1 / game.totalTime)* 50);

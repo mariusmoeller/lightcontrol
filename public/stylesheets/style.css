@@ -1,6 +1,6 @@
 body {
   padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  font: 14px 'Roboto', sans-serif !important;
   background-color: #363A3F !important;
 }
 
@@ -122,4 +122,11 @@ input[type=range] {
 
 #btns {
     top: 1em;
+}
+
+#player {
+    width: 50%;
+    display: none;
+    padding: 8px;
+    margin: 20px;
 }

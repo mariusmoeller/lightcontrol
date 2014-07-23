@@ -710,7 +710,8 @@ img.bg {
 }
 
 .modal-content {
-  background-color: #333 !important;
+  background-color: #eee !important;
+  font-size: 2em;
 }
 
 #game > #collapse > .panel-body > p {

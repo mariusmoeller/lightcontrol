@@ -23,7 +23,7 @@ block content
       .select-start(name='button-start')
       .stick(name='stick-1')
       .stick(name='stick-2')
-      .face(name='button-dpad-top')
+      .face(name='button-dpd-top')
       .face(name='button-dpad-bottom')
       .face(name='button-dpad-left')
       .face(name='button-dpad-right')
@@ -118,6 +118,9 @@ block content
           | You reached 
           span#totalScore 0
           |  points!
+          br
+          p#highscore(style="color: red; font-weight: bold; display: none;") Highscore!!!
         .modal-footer
+          input.form-control(type='text', placeholder='Enter your Name', autofocus='autofocus', id='player')
           button#again.btn.btn-default(type='button', data-dismiss='modal') Try Again
           button#back.btn.btn-primary(type='button') Back to App
