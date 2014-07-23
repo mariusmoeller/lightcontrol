@@ -18,20 +18,27 @@
  */
 $('#methodList').change(function(){ 
   helper.method = $("#methodList")[0].selectedIndex ;
-  if(helper.method >= 3){
+  /*if(helper.method >= 3){
     $('#labyrinthOptions').show();
     if(helper.method == 3){
       labyrinth.mode = "easy";
     }else{
       labyrinth.mode = "difficult";
     }
-  }
+  }*/
 });
+
+$('.thumbnail').click(function(){
+  labyrinth.mode = this.childNodes[0].name;
+  helper.method = 3;
+  $('#labyrinthOptions').show();
+})
 
 $('#labConfDone').click(function(){
       labyrinth.init();
       $("body").children().hide();
       $('.bg').attr("src","img/route-" + labyrinth.mode + ".jpg");
+      $('.game-information').addClass(labyrinth.mode + 'Lab');
       $('#race').show();
 });
 
@@ -136,7 +143,7 @@ var labyrinth = {
     helper.socket.emit('color', '#00ff00', 0);
     player.reset();
     $('#gameStatus').text("not yet started");
-    $('#time').text("0");
+    $('#time').text("");
     $('#totalTurns').text("0");
   },
 
@@ -252,7 +259,7 @@ var game = {
     this.timer = setInterval(function () {
         game.totalTime++;
         game.turnTime++;
-        $('#time').text(game.totalTime);
+        $('#time').text(game.totalTime + ((game.totalTime == 1) ? " second" : " seconds"));
         player.updateScore();
     }, 1000);
   },
@@ -302,12 +309,12 @@ var player = {
     this.score = 0;
     this.moves = 0;
     this.obstaclesCrashed = 0;
-    $('#score').text(this.score);
+    $('#score').text("");
     $('#absolvedTurns').text(player.turnsFinished);
   },
   updateScore : function() {
     this.score = Math.round((this.moves - this.obstaclesCrashed / this.moves ) * (1 / game.totalTime)* 50);
-    $('#score').text(this.score);
+    $('#score').text(this.score + " Points");
   }
 };
 
@@ -456,9 +463,10 @@ var controller = {
     var orientations = [
                   // A    B   X   Y
                   ["backward", "right", "left", "forward"],    //method 0
-                  [],                                                      //method 1
-                  ["forward", "backward", 0, 0],              //method 2
-                  ["backward", "right", "left", "forward"]    //method 3 -- labyrinth
+                  [],                                          //method 1
+                  ["forward", "backward", 0, 0],               //method 2
+                  ["backward", "right", "left", "forward"],    //method 3 -- labyrinth
+                  ["backward", "right", "left", "forward"]
     ];
     var o = orientations[helper.method][id-1];
     if(o)
