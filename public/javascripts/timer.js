@@ -156,8 +156,35 @@ function hexToHsl(hex){
         l: l,
     } ;
 
+}    
+
+function rgbToHsv(color){
+    var r = color.r;
+    var g = color.g;
+    var b = color.b;
+
+
+    r = r/255, g = g/255, b = b/255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b);
+    var h, s, v = max;
+
+    var d = max - min;
+    s = max == 0 ? 0 : d / max;
+
+    if(max == min){
+        h = 0; // achromatic
+    }else{
+        switch(max){
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+
+    return [h, s, v];
 }
-    
+
 
 function hslToRgb(h, s, l){
     var r, g, b;
@@ -182,7 +209,7 @@ function hslToRgb(h, s, l){
     }
 
     return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-}
+} 
 
 
 function componentToHex(c) {
@@ -195,16 +222,17 @@ function rgbToHex(r, g, b) {
 }
 
 
+
     function timeProgression() {
         
-       debugger;
+      // debugger;
         if (!$.isEmptyObject(startColor) && !$.isEmptyObject(endColor)) {
 
             
             var sec = parseInt($('.knob.second').val()) + ( parseInt($('.knob.minute').val() * 60 )) + ( parseInt($('.knob.hour').val() * 3600));
             
 
-            console.log(sec);
+           // console.log(sec);
 
 
             var hPerS = Math.abs((endColor.h - startColor.h)) / sec;
@@ -221,52 +249,45 @@ function rgbToHex(r, g, b) {
 
             var socket = io.connect();
 
-
-            console.log(startColor);
-            console.log(endColor);
-
             var colors = [hS,sS,lS];
 
             counter=0;
 
+            var pulse = sec / 60;
+            var oldL = lS;
 
-            var test = [];
-
+            var colorArray = [];
 
             while(counter < sec){
-
-              //  setTimeout(function(){  
-
-
-
+                    //normaler farbverlauf in positiver grad richtung
                     hS += hPerS;
                     sS += sPerS;
                     lS += lPerS;
 
-                    colors = [hS,sS,lS];
-
-                    var RGB = hslToRgb(hS,sS,lS);
-
-                    var hex = rgbToHex(RGB[0],RGB[1],RGB[2]);
-
-                    test[counter] = hex;
-                    
-                    // TODO: send proper light id
-                    //socket.emit('color', hex, 0);
-                    
-                    
-
-                    counter++;
-
-                    
-               // }, 2000);
-
+                    colorArray[counter] = [hS,sS,lS];                    
+                    counter++;      
             }
+            
+            for (var i = 0; i < colorArray.length; i++) {
+                var colors = colorArray[i];
+                var RGB = hslToRgb(colors[0],colors[1],colors[2]);
+                var hex = rgbToHex(RGB[0],RGB[1],RGB[2]);
+                colorArray[i] = hex;
+            }
+
+            //blinking in the end
+            for (var i = 0; i < 5; i++) {
+                if(i%2 == 0)
+                    colorArray.push('#000000');
+                else
+                    colorArray.push(colorArray[colorArray.length-2]);
+            }
+
+            colorArray.push('#000000');
           
-           // return test;
-            console.log(test);
-            socket.emit("timer",test);
-
-
+            socket.emit("timer",colorArray);
     }
 }
+
+
+

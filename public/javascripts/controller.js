@@ -18,18 +18,85 @@
  */
 $('#methodList').change(function(){ 
   helper.method = $("#methodList")[0].selectedIndex ;
-  if(helper.method >= 3){
-
-    $('.collapse').collapse();
-    $('#labyrinthOptions').show();
-    if(helper.method == 4)
-      obstacles.init();
-  }
 });
 
-$('#labConfDone').click(function(){
+$('img').click(function(){
+  var mode = this.name;
+  if(mode.length){
+    labyrinth.mode = mode;
+    helper.method = 3;
+    $('#selLab').attr("src", "img/"+mode+"-thumbnail.jpg");
+    $('#mode').text(mode).css('textTransform', 'capitalize');
+    createTBody(mode);
+
+    $('#pongInfo').removeClass('fadeInUp').addClass('animated fadeOutUp')
+                   .one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function(){
+      $(this).hide();
+      $('#selectedLabyrinth').removeClass('fadeOutUp').addClass('animated fadeInUp').show();
+    });
+  }  
+});
+
+function createTBody(mode){
+  $('#highscoreTable').children('tbody').remove();
+  var tbody = $('<tbody/>');
+  var scores = highscore[mode];
+  for(var i=0;i<scores.length;i++){
+    var row = $('<tr/>').append(
+      $('<td/>',{
+        text: i+1
+      })
+    ).append(
+      $('<td/>',{
+        text: scores[i].name
+      })
+    ).append(
+      $('<td/>',{
+        text: scores[i].score
+      })
+    );
+    row.appendTo(tbody);
+  }
+  tbody.appendTo($('#highscoreTable'));
+}
+
+$('#startGame').click(function(){
       labyrinth.init();
-      $('.collapse').collapse('hide');
+      $("body").children().hide();
+      $('.bg').attr("src","img/route-" + labyrinth.mode + ".jpg");
+      $('.game-information').addClass(labyrinth.mode + 'Lab');
+      $('#race').show();
+});
+
+$('#backButton').click(function(){
+    labyrinth.hide();
+});
+
+$('#back').click(function(){
+  debugger;
+  if($('#highscore').css('display') == "block"){
+    var o = {
+      "name": $('#player').val(),
+      "score": game.pointHighScore
+    };
+    highscore[labyrinth.mode].add(o);
+    helper.sortHighscore();
+  }
+  $('#gameFinished').modal('hide');
+   labyrinth.hide();
+});
+
+$('#again').click(function(){
+  $('#gameFinished').modal('hide');
+  labyrinth.init();
+});
+
+$('#allLabs').click(function(){
+  $('#selectedLabyrinth').removeClass('fadeInUp').addClass('animated fadeOutUp')
+                 .one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function(){
+    $(this).hide();
+    $('#pongInfo').removeClass('fadeOutUp').addClass('animated fadeInUp').show();
+  });
 });
 
 $('#coordinates').click(function(){
@@ -48,7 +115,6 @@ $('#coordinates').click(function(){
   socket: io.connect(),
   method: 0,
   transform3D: function(x, y, z){
-    //console.log("x: " + x + " y: " + y + " z: " + z);
     var cX = 0;
     var cY = 1;
     var cZ = 0;
@@ -71,10 +137,14 @@ $('#coordinates').click(function(){
 
     var data = [alpha, beta];
     return data;
+  },
+  orderHighscore: function(){
+    
   }
 };
 
 var labyrinth = {
+  mode : "",
   washHeight : 0,
   projectorHeight: 0,
   screenHeight : 0,
@@ -94,72 +164,181 @@ var labyrinth = {
     this.screenHeight = parseInt($('#screenHeight').val());
     this.screenWidth = parseInt($('#screenWidth').val());
 
+    
     this.zMax = this.projectorHeight - this.washHeight + this.screenHeight;
     this.zMin = this.projectorHeight - this.washHeight;
     this.yMax = Math.round(this.screenWidth / 2);
     this.yMin = Math.round((-1) * this.screenWidth / 2);
 
-    this.currentY = Math.round((this.screenWidth / 2) * (-1) + 5);
-    this.currentZ = this.projectorHeight - this.washHeight + this.screenHeight;
+    //start line
+    var startLine = window[labyrinth.mode + "StartLine"];
+    this.currentY = this.yMin + startLine.xStart + Math.round((startLine.xEnd - startLine.xStart / 2));
+    this.currentZ = this.zMax - startLine.y;
 
     this.sendPosition();
     helper.socket.emit('color', '#00ff00', 0);
+    player.reset();
+    $('#time').text("");
+  },
+
+  hide: function(){
+    game.gameFinished(false);
+    $('.game-information').removeClass(labyrinth.mode + 'Lab');
+    $("body").children().show();
+    $('#race').hide();
+    $('#gamepads').hide();
+    $('#gameFinished').hide();
   },
 
   move: function(direction){
-    switch(direction){
-      case "forward" :   this.currentZ++;  break;
-      case "backward" :  this.currentZ--; break;
-      case "right" : this.currentY++; break;
-      case "left" : this.currentY--; break;
+    player.moves++;
+    if(player.moves == 1){
+      game.startGame();
     }
-    this.sendPosition();
+    var y = this.currentY;
+    var z = this.currentZ;
+    switch(direction){
+      case "forward" :   z++;  break;
+      case "backward" :  z--; break;
+      case "right" : y++; break;
+      case "left" : y--; break;
+    }
 
-    if(this.currentZ > this.zMax || this.currentZ < this.zMin || this.currentY > this.yMax || this.currentY < this.yMin)
+    if(z > this.zMax || z < this.zMin || y > this.yMax || y < this.yMin){
+      console.log("aus dem Feld raus");
       helper.socket.emit('color', '#ff0000', 0); //red
-    else
+    }else{
       helper.socket.emit('color', '#00ff00', 0); //green
+      var obstaclesImWeg = this.checkObstacles(y, z);
+      if(!obstaclesImWeg){
+        this.currentY = y;
+        this.currentZ = z;
+        this.sendPosition();
 
-    if(helper.method == 4){
-      for(var i=0;i<obstacles.positions.length;i++){
-        var p = obstacles.positions[i];
-        if(this.currentY == p[0] && this.currentZ == p[1])
-          helper.socket.emit('color', '#000ff', 0);
-      }
+        var startLineImWeg = this.checkStartLine();
+        if(startLineImWeg){
+          console.log("start linie im weg");
+          game.turnFinished();
+          helper.socket.emit('color', '#ffff00', 0); //yellow
+        }
+       }else{
+          console.log("crash");
+          player.obstaclesCrashed++;
+      //  player.updateScore();
+          helper.socket.emit('color', '#0000ff', 0); //blue
+       }
     }
   },
 
   sendPosition: function(){
     helper.socket.emit('setPosByDegrees', helper.transform3D(this.distance, this.currentY, this.currentZ), 0);
+  },
+
+  checkObstacles: function(y, z){
+    var xInArray = Math.round(this.yMax + y);
+    var yInArray = Math.round(this.zMax - z);
+    var obstacles = window[labyrinth.mode + "Obstacles"];
+    if(obstacles[yInArray]){
+      if(obstacles[yInArray][xInArray]){
+        return true;
+      }
+    }
+      return false;
+    },
+
+    checkStartLine: function() {
+      var xInArray = this.currentY + Math.round(this.screenWidth/2);
+      var yInArray = this.zMax - this.currentZ;
+      var startLine = window[labyrinth.mode + "StartLine"];
+      if(yInArray == startLine.y){
+        if(xInArray >= startLine.xStart && xInArray <= startLine.xEnd){
+          return true;
+        }
+      }
+      return false; 
+    }
+};
+
+var game = {
+  turnsToFinish : 3,
+  totalTime : 0,
+  turnTime : 0,
+  timer : null,
+  showStatus : function(seconds) {
+    if($('#race').has('div').length){
+      $('.alert').remove();
+    }
+    var alert = $('<div/>', {
+          role: 'alert',
+          text: 'Succes! You finished one turn in ' + seconds + ' seconds!',
+          style: 'position: relative; top: 50px;'
+    }).addClass('alert').addClass('alert-success');
+    $('#race').append(alert);
+
+    setTimeout(function() {
+        $('.alert').fadeOut('slow');
+    }, 2000); 
+  },
+  startGame : function() {
+    this.turnsToFinish = 3;
+    this.totalTime = 0;
+    this.turnTime = 0;
+    this.timer = null;
+    this.timer = setInterval(function () {
+        game.totalTime++;
+        game.turnTime++;
+        $('#time').text(game.totalTime + ((game.totalTime == 1) ? " second" : " seconds"));
+        player.updateScore();
+    }, 1000);
+  },
+  turnFinished : function() {
+    var timeForRound = this.turnTime;
+    player.turnsFinished++;
+    if(player.turnsFinished < game.turnsToFinish){
+      this.showStatus(timeForRound);
+    }
+    if(player.fastestTurn > timeForRound){
+      player.fastestTurn = timeForRound;
+    }
+    if(player.turnsFinished == game.turnsToFinish){
+      this.gameFinished(true);
+    }
+    this.turnTime = 0;
+  },
+  gameFinished : function(done) {
+    clearInterval(this.timer);
+    if(done){
+      $('#gameTime').text(game.totalTime);
+      $('#fastestTurn').text(player.fastestTurn);
+      $('#totalScore').text(player.score);
+      $('#gameFinished').modal();
+      debugger;
+      if(highscore[labyrinth.mode][0].score < player.score){
+        $('#highscore').show();
+      }else{
+        $('#highscore').hide();
+      }
+      helper.socket.emit('color', '#ffffff', 0); //white 
+    }
   }
 };
 
-var obstacles = {
-  positions : [],
-  init : function() {
-    var yLeftBorder = -108;
-    var yRightBorder = 108;
-
-    var zMax1 = 140;
-    var zMin1 = 136;
-
-    var zMax2 = 90;
-    var zMin2 = 86;
-
-    var yStop1 = 32;
-    var yStop2 = -34;
-
-    for(var y=yLeftBorder;y<yRightBorder;y++){
-      for(var z=zMax1;z>zMin2;z--){
-        var pos = [y, z];
-        if(z  >=zMin1 && z <= zMax1)
-          if(y < yStop1)
-            this.positions.push(pos);
-        if(z  >=zMin2 && z <= zMax2)
-          if(y > -yStop2)
-            this.positions.push(pos);
-      }
-    }
+var player = {
+  turnsFinished : 0,
+  score : 0,
+  moves : 0,
+  obstaclesCrashed : 0,
+  fastestTurn: 0,
+  reset : function() {
+    this.turnsFinished = 0;
+    this.score = 0;
+    this.moves = 0;
+    this.obstaclesCrashed = 0;
+    $('#score').text("");
+  },
+  updateScore : function() {
+    this.score = Math.round((this.moves - this.obstaclesCrashed / this.moves ) * (1 / game.totalTime)* 50);
+    $('#score').text(this.score + " Points");
   }
 };
 
@@ -189,9 +368,8 @@ var controller = {
     var el = document.createElement('li');
 
     // Copy from the template.
-    el.innerHTML =
-    document.querySelector('#gamepads > .template').innerHTML;
-
+    el.innerHTML = document.querySelector('#gamepads > .template').innerHTML;
+  
     el.id = 'gamepad-0';
     el.querySelector('.name').innerHTML =  "Lightcontrol IMI 2014"; //gamepad.id ||
     el.querySelector('.index').innerHTML = 0; //gamepad.iid
@@ -278,11 +456,11 @@ var controller = {
   buttonPressed: function(id) {
     var orientations = [
                   // A    B   X   Y
-                  ["backward", "right", "left", "forward"], //method 0
-                  [],                                                                     //method 1
-                  ["forward", "backward", 0, 0],                   //method 2
-                  ["backward", "right", "left", "forward"] ,  //method 3 -- labyrinth
-                  ["backward", "right", "left", "forward"]    //method 4 -- labyrinth
+                  ["backward", "right", "left", "forward"],    //method 0
+                  [],                                          //method 1
+                  ["forward", "backward", 0, 0],               //method 2
+                  ["backward", "right", "left", "forward"],    //method 3 -- labyrinth
+                  ["backward", "right", "left", "forward"]
     ];
     var o = orientations[helper.method][id-1];
     if(o)

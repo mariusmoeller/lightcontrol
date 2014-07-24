@@ -1,16 +1,126 @@
 extends layout
-
+append javascript
+  script(src='/javascripts/gamepad.js')
+  script(src='/javascripts/controller.js')
+  script(src='/javascripts/obstacles.js')
+  script(src='/javascripts/highscore.js')
+  script.
+    controller.init();
+    gamepadSupport.init();
 block content
+  ul#gamepads(style="display:none")
+   li.template
+    .buttons
+      .face(name='button-1')
+      .face(name='button-2')
+      .face(name='button-3')
+      .face(name='button-4')
+      .top-shoulder(name='button-left-shoulder-top')
+      .top-shoulder(name='button-right-shoulder-top')
+      .bottom-shoulder(name='button-left-shoulder-bottom')
+      .bottom-shoulder(name='button-right-shoulder-bottom')
+      .select-start(name='button-select')
+      .select-start(name='button-start')
+      .stick(name='stick-1')
+      .stick(name='stick-2')
+      .face(name='button-dpd-top')
+      .face(name='button-dpad-bottom')
+      .face(name='button-dpad-left')
+      .face(name='button-dpad-right')
+    .index
+    marquee.name(scrolldelay='50', scrollamount='2')
   .container
     .row
-      .col-md-8.top-space
-        div.jumbotron
-         h3 Car Ralley
-         p Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea
-       .col-md-4.top-space
-        div.jumbotron
-         img(src="/img/controller.jpg")(style="position:relative;width:100%;border-radius:90px")
-         a(href='/controller').btn.btn-default.btn-lg.btn-block Move 
-    .row
-      .col-md-12.top-space
-       a(href='/')#btn-back.btn.btn-default.btn-lg.btn-block Back
+      .col-md-9.col-md-offset-1.top-space
+        #pongInfo
+          .jumbotron
+           h2 Virtual Hot Wire
+           .infoText Use a X-Box Controller to drive through a labyrinth bla bla
+           img#pongLogo(src="/img/pong.png")(style="position:relative;width:60%;left:20%;border-radius:90px")
+          .row#labyrinths
+            .col-md-3
+              .thumbnail
+               img(src='img/easy-thumbnail.jpg', name="easy", style="position:relative;")
+            .col-md-3
+              .thumbnail
+               img(src='img/medium-thumbnail.jpg', name="medium", style="position:relative;")
+            .col-md-3
+              .thumbnail
+               img(src='img/hard-thumbnail.jpg', name="hard", style="position:relative;")
+            .col-md-3
+              .thumbnail
+               img(src='img/extreme-thumbnail.jpg', name="extreme", style="position:relative;")
+        #selectedLabyrinth(style="display:none;")
+           .row
+            .col-md-3
+              .thumbnail
+               img#selLab(style="position:relative;")
+            .col-md-6
+             .row#labyrinthOptions
+              div#accordion.panel-group
+                div.panel.panel-default
+                  div.panel-heading
+                    h4.panel-title
+                      a(data-toggle='collapse', data-parent='#accordion', href='#collapseOne') Configuration
+                  div#collapseOne.panel-collapse.collapse
+                    div.panel-body
+                      form(role='form')
+                      .form-group
+                        label(for='distance') Distance
+                        input#distance.form-control(type='text', placeholder='Enter Distance in cm', value='210')
+                      .form-group
+                        label(for='washHeight') Wash Height
+                        input#washHeight.form-control(type='text', placeholder='Enter  Height of Wash in cm', value='52')
+                      .form-group
+                        label(for='projectorHeight') Projector Height
+                        input#projectorHeight.form-control(type='text', placeholder='Enter Height of Projector in cm', value ='114')
+                      .form-group
+                        label(for='screenWidth') Screen Width
+                        input#screenWidth.form-control(type='text', placeholder='Enter Width of Screen in cm', value='210')
+                      .form-group
+                        label(for='screenHeight') Screen Height
+                        input#screenHeight.form-control(type='text', placeholder='Enter Height of Screen in cm', value='122')
+            .col-md-3#btns
+              button.btn.btn-primary.btn-lg.btn-block#startGame Start Game
+              button.btn.btn-default.btn-lg.btn-block#allLabs Show All Labs
+           .jumbotron#highscore
+            h2
+             | Highscore 
+             span#mode  
+             |  Labyrinth
+            table#highscoreTable.table.table-striped
+             thead
+              tr
+               th 
+               th Name
+               th Score
+             tbody
+  div#race
+   img.bg
+   button#backButton.btn.btn-default.btn-lg.btn-block Back
+   .game-information
+      span#time
+      br
+      br
+      span#score(style="font-size:75%;")
+  #gameFinished.modal.fade(tabindex='-1', role='dialog', aria-hidden='true')
+    .modal-dialog
+      .modal-content
+        .modal-body
+          | You finished the Game in 
+          span#gameTime 12387
+          |  seconds!
+          br
+          | Your fastest turn took 
+          span#fastestTurn 11
+          |  seconds! 
+          br
+          | You reached 
+          span#totalScore 0
+          |  points!
+          br
+          p#highscore(style="color: red; font-weight: bold; display: none;") Highscore!!!
+        .modal-footer
+          input.form-control(type='text', placeholder='Enter your Name', autofocus='autofocus', id='player')
+          button#again.btn.btn-default(type='button', data-dismiss='modal') Try Again
+          button#back.btn.btn-primary(type='button') Back to App

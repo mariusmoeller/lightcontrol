@@ -6,6 +6,7 @@ $(function() {
   var $startButton = $('.btn-start-game');
   var $startWindow = $('#start-window')
   var $gameInfo    = $('#game-info');
+  var $endButton = $('.btn-end-game');
   var $user1       = $('#player1');
   var $user2       = $('#player2');
 
@@ -13,6 +14,8 @@ $(function() {
   var user2         = ''
   var user1Points   = 0;
   var user2Points   = 0;
+
+      var socket = io.connect();
 
   var updatePoints = function (scoringUser) {
       if (scoringUser == 1) {
@@ -29,24 +32,32 @@ $(function() {
   }
 
   $startButton.click(function(e) {
-      var socket = io.connect();
       user1 = $user1.val();
-      if(this.name == "1player"){
-        user2 = "Computer";
-        socket.emit('pong', 1);
-      }else{
-        user2 = $user2.val();
-        socket.emit('pong', 2);
-      }
+      user2 = $user2.val();
+      socket.emit('pong', 2);
+
       $('#pongLogo').hide();
       $('#playerMode').hide();
-      $('#update-points').show();
+      $('.jumbotron').hide();
+      $('.btn-end-game').show();
       updatePoints();
+  });
+
+  $endButton.click(function(){
+    socket.emit('pong', 0);
+    $('.btn-end-game').hide();
+    $('#pongLogo').show();
+    $('#playerMode').show();
+    $('.jumbotron').show();
   });
 
   //test function
   $('#update-points').click(function () {
       updatePoints(scoringUser = 1);
   });
+
+   socket.on('pongScore', function(player) {
+      updatePoints(player);
+    });
 
 });

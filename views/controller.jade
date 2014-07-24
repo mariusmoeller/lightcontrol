@@ -3,6 +3,7 @@ extends layout
 append javascript
   script(src='/javascripts/gamepad.js')
   script(src='/javascripts/controller.js')
+  script(src='/javascripts/obstacles.js')
   script.
     controller.init();
     gamepadSupport.init();
@@ -15,39 +16,11 @@ block content
         option Buttons / Stick 1 / Stick 2
         option Shoulder / Stick 1
         option Buttons / Stick 1
-        option Labyrinth
-        option Labyrinth with Obstacles
       .col-lg-3
         .input-group
           input#coordinatesInput.form-control(type='text', placeholder='Enter coordinates')
           span.input-group-btn
               button#coordinates.btn.btn-default(type='button') Go!
-      .col-lg-6
-        div#labyrinthOptions
-            div#accordion.panel-group
-              div.panel.panel-default
-                div.panel-heading
-                  h4.panel-title
-                    a(data-toggle='collapse', data-parent='#accordion', href='#collapseOne') Configuration
-                  button#labConfDone.btn.btn-default(type='button') Done
-                div#collapseOne.panel-collapse.collapse.in
-                  div.panel-body
-                    form(role='form')
-                    .form-group
-                      label(for='distance') Distance
-                      input#distance.form-control(type='text', placeholder='Enter Distance in cm', value='450')
-                    .form-group
-                      label(for='washHeight') Wash Height
-                      input#washHeight.form-control(type='text', placeholder='Enter  Height of Wash in cm', value='78')
-                    .form-group
-                      label(for='projectorHeight') Projector Height
-                      input#projectorHeight.form-control(type='text', placeholder='Enter Height of Projector in cm', value ='112')
-                    .form-group
-                      label(for='screenWidth') Screen Width
-                      input#screenWidth.form-control(type='text', placeholder='Enter Width of Screen in cm', value='215')
-                    .form-group
-                      label(for='screenHeight') Screen Height
-                      input#screenHeight.form-control(type='text', placeholder='Enter Height of Screen in cm', value='155')
   ul#gamepads
    li.template
     .buttons
