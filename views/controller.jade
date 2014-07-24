@@ -2,46 +2,43 @@ extends layout
 
 append javascript
   script(src='/javascripts/gamepad.js')
-  script(src='/javascripts/tester.js')
+  script(src='/javascripts/controller.js')
+  script(src='/javascripts/obstacles.js')
   script.
-    tester.init();
+    controller.init();
     gamepadSupport.init();
 
 block content
   .container
-    .row
-     .col-md-12.top-space
-     select.form-control#methodList
-      option Buttons / Stick 1 / Stick 2
-      option Shoulder / Stick 1
-      option Buttons / Stick 1
-    .row
-      .col-md-8.top-space
-      #no-gamepad-support
-       | Your browser does not seem to support Gamepad API, or it might be
-       | we’re not detecting it very well. Sorry!
-      #no-gamepads-connected
-       | No gamepads seem to be connected. Be sure to plug in a gamepad and then
-       | press any of its buttons to activate it.
-      ul#gamepads
-       li.template
-        .buttons
-          .face(name='button-1')
-          .face(name='button-2')
-          .face(name='button-3')
-          .face(name='button-4')
-          .top-shoulder(name='button-left-shoulder-top')
-          .top-shoulder(name='button-right-shoulder-top')
-          .bottom-shoulder(name='button-left-shoulder-bottom')
-          .bottom-shoulder(name='button-right-shoulder-bottom')
-          .select-start(name='button-select')
-          .select-start(name='button-start')
-          .stick(name='stick-1')
-          .stick(name='stick-2')
-          .face(name='button-dpad-top')
-          .face(name='button-dpad-bottom')
-          .face(name='button-dpad-left')
-          .face(name='button-dpad-right')
-        .index
-        marquee.name(scrolldelay='50', scrollamount='2')
-      
+    .row.top-space
+     .col-lg-3
+       select.form-control#methodList
+        option Buttons / Stick 1 / Stick 2
+        option Shoulder / Stick 1
+        option Buttons / Stick 1
+      .col-lg-3
+        .input-group
+          input#coordinatesInput.form-control(type='text', placeholder='Enter coordinates')
+          span.input-group-btn
+              button#coordinates.btn.btn-default(type='button') Go!
+  ul#gamepads
+   li.template
+    .buttons
+      .face(name='button-1')
+      .face(name='button-2')
+      .face(name='button-3')
+      .face(name='button-4')
+      .top-shoulder(name='button-left-shoulder-top')
+      .top-shoulder(name='button-right-shoulder-top')
+      .bottom-shoulder(name='button-left-shoulder-bottom')
+      .bottom-shoulder(name='button-right-shoulder-bottom')
+      .select-start(name='button-select')
+      .select-start(name='button-start')
+      .stick(name='stick-1')
+      .stick(name='stick-2')
+      .face(name='button-dpad-top')
+      .face(name='button-dpad-bottom')
+      .face(name='button-dpad-left')
+      .face(name='button-dpad-right')
+    .index
+    marquee.name(scrolldelay='50', scrollamount='2')

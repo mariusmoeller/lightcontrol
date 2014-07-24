@@ -43,6 +43,12 @@ app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
+
+app.use(function(req, res, next){
+   res.locals.devices = devices;
+   next();
+});
+
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -62,6 +68,11 @@ app.get('/timer', timerRoute.list);
 app.get('/conf', function(req, res) {res.render('conf')});
 app.get('/draw', function(req, res) {res.render('draw')});
 
+// API
+app.get('/devices', function(req, res) {
+    res.json(nconf.get('devices'));
+});
+
 var server = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
@@ -70,18 +81,16 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 var Artnet = require('./src/ArtnetClient');
 var artnetClient = new Artnet(nconf.get('address'), nconf.get('port'));
 
-// Set up lights
-var Light = require('./src/Light');
-var MovingHead = require('./src/MovingHead');
+// Load device classes
+var Devices = {};
+require("fs").readdirSync("./src/devices").forEach(function(file) {
+  Devices[file.substr(0, file.length-3)] = require("./src/devices/" + file);
+});
 
-// TODO: It might be better to change hierarchy to:
-// device {id: X, type: X} so that each light, moving head etc has a unique id
-// object creation depending on type a la new DeviceType(conf, artnetClient)
-
+// Set up configured devices
 var devices = nconf.get('devices');
 _(devices).forEach(function(device, i) {
-    // TODO: Allow different devices, not only moving heads
-    devices[i] = new MovingHead(device, artnetClient);
+    devices[i] = new Devices[device.type](device, artnetClient);
 });
 
 // Misc
@@ -105,21 +114,34 @@ socketio.listen(server).on('connection', function(socket) {
 
     socket.on('movement', function(data, id) {
 
-        data = sanitize.movement(data);
-        // TODO: is Z and X swapped? pan should be z and tilt x?
-        devices[0].setPos(data[2], data[0]);
-
         debug('movement data send to artnet client, data: ' + data);
+
+        // data = sanitize.movement(data);
+        // devices[0].setPos(data[2], data[0]);
+
+        devices[0].setPosByDegrees(360 - data['alpha'], data['beta'] + 90)
 
         if (record)
             show.addData(1, data);
     });
 
-    socket.on('move', function(step) {
-        var id = 0;
-        devices[id].makeStep(step);
-        debug('movement data send to artnet client, direction: ' + step);
+    socket.on('pong', function(options) {
+        console.log("pong: " +options);
+        socket.broadcast.emit('pong', options);
     });
+
+    socket.on('pongScore', function(player) {
+        console.log("player " + player + " scored");
+        socket.broadcast.emit('pongScore', player);
+    });
+
+    socket.on('move', function(data, id) {
+        devices[id].move(data.z, data.x);
+    });
+
+    socket.on('setPos', function(data, id) {
+        devices[id].setPos(data[0], data[1]);
+    })
 
     socket.on('color', function(hexColor, id) {
         debug('Recieved color data: ' + hexColor);
@@ -178,8 +200,7 @@ socketio.listen(server).on('connection', function(socket) {
     socket.on('direct', function(data) {
         console.log(data);
         artnetClient.send(data);
-    })
-
+    });
 
     socket.on("timer",function(colorArray){
         var counter = 0;
@@ -201,8 +222,4 @@ socketio.listen(server).on('connection', function(socket) {
         }, 1000);
 
     });
-    
-
-
-
 });

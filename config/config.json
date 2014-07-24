@@ -4,6 +4,7 @@
   "devices": {
     "0": {
       "type": "MovingHead",
+      "name": "Vizi Wash",
       "r": {
         "channel": 4
       },
@@ -31,6 +32,11 @@
       "tilt": {
         "channel": 2,
         "max": 265
+      },
+      "strobo": {
+        "channel": 8,
+        "min": 64,
+        "max": 95
       }
     }
   }

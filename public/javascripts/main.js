@@ -93,8 +93,8 @@ window.onload = function() {
 	});
 
 	$('#btn-start-game').click(function() {
-		var socket = io.connect();
-		socket.emit('startShow');
+		// var socket = io.connect();
+		// socket.emit('startShow');
 	});
 
 	$('#btn-send-dmx').click(function() {
@@ -168,5 +168,17 @@ window.onload = function() {
 		// xData = [];
 		// yData = [];
 
-	})
+	});
+
+	 $( ".thumbnail" )
+	        .click(function() {
+	            $(this).find('.caption').removeClass("slideOutLeft").addClass("slideInLeft").show();
+	            $('.disabled').show();
+	});
+
+	if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+		$('#btn-send-position').show();
+	}else{
+		$('#btn-send-position').hide();
+	}
 }
