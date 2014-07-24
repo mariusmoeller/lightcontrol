@@ -3,6 +3,43 @@
   "port": 6454,
   "devices": {
     "0": {
+        "type": "MovingHead",
+        "name": "MAC 350 Entour",
+        "shutter": {
+          "channel": 0,
+          "value": 255
+        },
+        "intensity": {
+          "channel": 1,
+          "value": 255
+        },
+        "tilt": {
+          "channel": 12,
+          "max": 300
+        },
+        "pan": {
+          "channel": 10,
+          "max": 720
+        },
+        "iris" : {
+          "channel": 6,
+          "value": 210
+        },
+        "focus": {
+          "channel": 7,
+          "value": 150
+        },
+        "r": {
+          "channel": 2
+        },
+        "g": {
+          "channel": 2
+        },
+        "b": {
+          "channel": 2
+        }
+    },
+     "1": {
       "type": "MovingHead",
       "name": "Vizi Wash",
       "r": {

@@ -15,10 +15,18 @@ Light.prototype.setColor = function(rgb) {
 
 Light.prototype.turnOn = function() {
     var data = {};
-    data[this.conf.on.channel] = this.conf.on.value;
-    data[this.conf.intensity.channel] = 255;
-
+ //   data[this.conf.on.channel] = this.conf.on.value;
+  //  data[this.conf.intensity.channel] = 255;
+    data[this.conf.shutter.channel] = this.conf.shutter.value;
+    data[this.conf.intensity.channel] = this.conf.intensity.value;
     this.artnet.send(data);
+}
+
+Light.prototype.setSpot = function() {
+    var data = {};
+    data[this.conf.iris.channel] = this.conf.iris.value;
+    data[this.conf.focus.channel] = this.conf.focus.value;
+        this.artnet.send(data);
 }
 
 Light.prototype.turnOff = function() {

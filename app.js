@@ -100,6 +100,7 @@ var show = Show.createShow();
 // TODO: Put this somewhere else. Maybe turn everything on at start or better
 // save status in config and then send when server starts
 devices[0].turnOn();
+devices[0].setSpot();
 
 // TODO: Change to streaming socketio for improved performance
 // Listen to socketio connections
@@ -110,7 +111,7 @@ socketio.listen(server).on('connection', function(socket) {
         devices[0].setPosByDegrees(degrees[0], degrees[1]);
     })
 
-	socket.on('movement', function(data, id) {
+    socket.on('movement', function(data, id) {
 
         debug('movement data send to artnet client, data: ' + data);
 
@@ -121,7 +122,7 @@ socketio.listen(server).on('connection', function(socket) {
 
         if (record)
             show.addData(1, data);
-	});
+    });
 
     socket.on('pong', function(options) {
         console.log("pong: " +options);

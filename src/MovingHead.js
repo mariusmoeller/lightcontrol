@@ -28,6 +28,10 @@ MovingHead.prototype.setPos = function(x, z) {
     this.artnet.send(data);
 }
 
+MovingHead.prototype.setSpot = function() {
+    Light.prototype.setSpot.call(this);
+}
+
 MovingHead.prototype.setPosByDegrees = function(x, z) {
     var xConst = 255 / [this.conf.pan.max];
     var zConst = 255 / [this.conf.tilt.max];

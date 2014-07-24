@@ -26,6 +26,10 @@ var limitRange = function(value) {
     }
 }
 
+MovingHead.prototype.setSpot = function() {
+    Light.prototype.setSpot.call(this);
+}
+
 MovingHead.prototype.setPos = function(pan, tilt) {
     // Remember position
     this.pan = pan;
