@@ -293,11 +293,11 @@ var game = {
   turnFinished : function() {
     var timeForRound = this.turnTime;
     player.turnsFinished++;
-    if(player.turnsFinished < game.turnsToFinish){
-      this.showStatus(timeForRound);
-    }
     if(player.fastestTurn > timeForRound){
       player.fastestTurn = timeForRound;
+    }
+    if(player.turnsFinished < game.turnsToFinish){
+      this.showStatus(timeForRound);
     }
     if(player.turnsFinished == game.turnsToFinish){
       this.gameFinished(true);
@@ -326,7 +326,7 @@ var player = {
   score : 0,
   moves : 0,
   obstaclesCrashed : 0,
-  fastestTurn: 0,
+  fastestTurn: 99999999999,
   reset : function() {
     this.turnsFinished = 0;
     this.score = 0;
