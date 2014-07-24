@@ -1,19 +1,30 @@
 extends layout
 
 block content
-  .container
-    //
-        .row
-          .col-md-12
-            h1= title
-            p Welcome to #{title}
-    .row.top-space
-      .col-md-12
-        div#colors
-    .row.top-space
-      .col-md-12
-        div#btn-send-position.btn.btn-default.btn-lg.btn-block Move
 
-        p#alpha
-        p#beta
-        p#gamma
+	div(ontouchstart="this.classList.toggle('hover')")#colorTile.tile.flip-container
+		.flipper
+			.front
+				h3 Color Picker
+				p Use the color picker to send color data to the Moving Head. 
+				p Hover to show the color wheel.
+			.back
+				div#colors
+				
+	div(onclick="location.href='./car'")#carTile.tile
+		.flipper
+			h3 Virtual Hot Wire
+			p Control the light of the Moving Head with a Xbox 360 Controller. Drive through the course as fast as possible without hitting the edges.
+		
+		
+	div(onclick="location.href='./pong'")#pongTile.tile
+		.flipper
+			h3 Light Pong
+			p Play "Pong" with the Moving Head. Two players are going to play against each other, using their hands as rackets.
+		
+		
+	div(onclick="location.href='./timer'")#timerTile.tile
+		.flipper
+			h3 Light Timer
+			p Use the Moving Head as visual feedback for presentations. Set the time and select two colors.
+			

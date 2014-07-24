@@ -129,3 +129,85 @@ input[type=range] {
     padding: 8px;
     margin: 20px;
 }
+
+
+.btn {
+    margin-top: 10%;
+}
+
+#drawing-board {
+    margin: 5% auto;
+}
+
+/* start page tiles */
+.tile {
+    margin-top: 5%;
+    height: 35%;
+    width: 40%;
+    position: absolute;
+    color: #eee;
+    z-index: 0;
+    text-shadow: 1px 1px #000;
+}
+
+#colorTile {
+    background: #eee;
+    right: 5%;
+    background-image: url("/img/wheel.png");
+    background-size: cover;
+}
+
+#pongTile {
+    bottom: 5%;
+    left: 5%;
+    background-image: url("/img/pongV.png");
+    background-size: cover;
+}
+
+#timerTile {
+    bottom: 5%;
+    right: 5%;
+    background-image: url("/img/pras.jpg");
+    background-size: cover;
+}
+
+#carTile {
+    left: 5%;
+    background-image: url("/img/car.png");
+    background-size: cover;
+}
+
+.flip-container:hover .flipper, .flip-container.hover .flipper {
+    transform: rotateY(180deg);
+}
+
+.flipper {
+    margin: 5%;
+    transition: 0.6s;
+    transform-style: preserve-3d;
+    position: relative;
+    height: 90%;
+    width: 90%;
+}
+
+.front, .back {
+    backface-visibility: hidden;
+    width: 90%;
+    height: 90%;
+    z-index: 1;
+}
+
+#colors {
+    z-index: 1;
+}
+
+.back {
+    transform: rotateY(180deg);
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.tile p {
+    margin-top: 5%;
+}
