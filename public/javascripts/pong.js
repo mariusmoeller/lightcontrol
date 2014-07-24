@@ -22,18 +22,21 @@ $(function() {
       }
       $gameInfo.empty();
       $gameInfo.append('<p class="user user1">'+ user1 + '<span class"points">: ' + user1Points +'</span></p>');
-      meSpeak.speak(user1 + '–' + user1Points,{volume : 0.9}, function () {
+      meSpeak.speak(user1 + '–' + user1Points + "-" + "Points",{volume : 0.9}, function () {
             $gameInfo.append('<p class="user user2">'+ user2 + '<span class"points">: ' + user2Points +'</span></p>');
-            meSpeak.speak(user2 + '–' + user2Points);
+            meSpeak.speak(user2 + '–' + user2Points + "-" + "Points");
       });
   }
 
   $startButton.click(function(e) {
+      var socket = io.connect();
       user1 = $user1.val();
       if(this.name == "1player"){
         user2 = "Computer";
+        socket.emit('pong', 1);
       }else{
         user2 = $user2.val();
+        socket.emit('pong', 2);
       }
       $('#pongLogo').hide();
       $('#playerMode').hide();
