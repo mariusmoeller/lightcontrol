@@ -123,9 +123,17 @@ socketio.listen(server).on('connection', function(socket) {
             show.addData(1, data);
 	});
 
+    socket.on('pong', function(options) {
+        socket.broadcast.emit('pong', options);
+    });
+
+    socket.on('pongScore', function(player) {
+        socket.broadcast.emit('pongScore', player);
+    });
+
     socket.on('move', function(data, id) {
         devices[id].move(data.z, data.x);
-    })
+    });
 
     socket.on('setPos', function(data, id) {
         devices[id].setPos(data[0], data[1]);
