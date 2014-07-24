@@ -2,7 +2,7 @@
   "address": "192.168.0.200",
   "port": 6454,
   "devices": {
-    "0": {
+    "1": {
         "type": "MovingHead",
         "name": "MAC 350 Entour",
         "shutter": {
@@ -39,7 +39,7 @@
           "channel": 2
         }
     },
-     "1": {
+     "0": {
       "type": "MovingHead",
       "name": "Vizi Wash",
       "r": {

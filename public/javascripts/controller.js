@@ -73,13 +73,12 @@ $('#backButton').click(function(){
 });
 
 $('#back').click(function(){
-  debugger;
-  if($('#highscore').css('display') == "block"){
+  if($('#highscoreAlert').css('display') == "block"){
     var o = {
       "name": $('#player').val(),
-      "score": game.pointHighScore
+      "score": player.score
     };
-    highscore[labyrinth.mode].add(o);
+    highscore[labyrinth.mode].push(o);
     helper.sortHighscore();
   }
   $('#gameFinished').modal('hide');
@@ -138,7 +137,7 @@ $('#coordinates').click(function(){
     var data = [alpha, beta];
     return data;
   },
-  orderHighscore: function(){
+  sortHighscore: function(){
     
   }
 };
@@ -312,11 +311,10 @@ var game = {
       $('#fastestTurn').text(player.fastestTurn);
       $('#totalScore').text(player.score);
       $('#gameFinished').modal();
-      debugger;
       if(highscore[labyrinth.mode][0].score < player.score){
-        $('#highscore').show();
+        $('#highscoreAlert').show();
       }else{
-        $('#highscore').hide();
+        $('#highscoreAlert').hide();
       }
       helper.socket.emit('color', '#ffffff', 0); //white 
     }
