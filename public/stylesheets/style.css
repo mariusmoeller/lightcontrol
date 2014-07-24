@@ -126,7 +126,6 @@ input[type=range] {
 
 #player {
     width: 50%;
-    display: none;
     padding: 8px;
     margin: 20px;
 }

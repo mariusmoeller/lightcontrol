@@ -20,20 +20,21 @@ $('#methodList').change(function(){
   helper.method = $("#methodList")[0].selectedIndex ;
 });
 
-$('.thumbnail').click(function(){
-  var mode = this.childNodes[0].name;
-  labyrinth.mode = mode;
-  helper.method = 3;
-  $('#selLab').attr("src", "img/"+mode+"-thumbnail.jpg");
-  $('#mode').text(mode).css('textTransform', 'capitalize');
-  createTBody(mode);
+$('img').click(function(){
+  var mode = this.name;
+  if(mode.length){
+    labyrinth.mode = mode;
+    helper.method = 3;
+    $('#selLab').attr("src", "img/"+mode+"-thumbnail.jpg");
+    $('#mode').text(mode).css('textTransform', 'capitalize');
+    createTBody(mode);
 
-  $('#pongInfo').removeClass('fadeInUp').addClass('animated fadeOutUp')
-                 .one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function(){
-    $(this).hide();
-    $('#selectedLabyrinth').removeClass('fadeOutUp').addClass('animated fadeInUp').show();
-  });
-  
+    $('#pongInfo').removeClass('fadeInUp').addClass('animated fadeOutUp')
+                   .one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function(){
+      $(this).hide();
+      $('#selectedLabyrinth').removeClass('fadeOutUp').addClass('animated fadeInUp').show();
+    });
+  }  
 });
 
 function createTBody(mode){
@@ -72,6 +73,7 @@ $('#backButton').click(function(){
 });
 
 $('#back').click(function(){
+  debugger;
   if($('#highscore').css('display') == "block"){
     var o = {
       "name": $('#player').val(),
@@ -259,8 +261,6 @@ var labyrinth = {
 
 var game = {
   turnsToFinish : 3,
-  timeHighScore : 0,
-  pointHighScore : 0,
   totalTime : 0,
   turnTime : 0,
   timer : null,
@@ -312,16 +312,10 @@ var game = {
       $('#fastestTurn').text(player.fastestTurn);
       $('#totalScore').text(player.score);
       $('#gameFinished').modal();
-
-      if(game.totalTime > this.timeHighScore){
-        this.timeHighScore = game.totalTime;
-      }
-      if(player.score > game.pointHighScore){
-        game.pointHighScore = player.score;
-        $('#player').css('display', 'inline');
+      debugger;
+      if(highscore[labyrinth.mode][0].score < player.score){
         $('#highscore').show();
       }else{
-        $('#player').hide();
         $('#highscore').hide();
       }
       helper.socket.emit('color', '#ffffff', 0); //white 
