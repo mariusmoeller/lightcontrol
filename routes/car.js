@@ -3,5 +3,5 @@
  */
 
 exports.list = function(req, res){
-	  res.render('car', { title: 'Car Ralley'});
+	  res.render('car', { title: 'Hot Wire'});
 };
