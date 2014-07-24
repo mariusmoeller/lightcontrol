@@ -38,6 +38,7 @@ $('img').click(function(){
 });
 
 function createTBody(mode){
+  helper.sortHighscore();
   $('#highscoreTable').children('tbody').remove();
   var tbody = $('<tbody/>');
   var scores = highscore[mode];
@@ -73,21 +74,16 @@ $('#backButton').click(function(){
 });
 
 $('#back').click(function(){
-  if($('#highscoreAlert').css('display') == "block"){
-    var o = {
-      "name": $('#player').val(),
-      "score": player.score
-    };
-    highscore[labyrinth.mode].push(o);
-    helper.sortHighscore();
-  }
-  $('#gameFinished').modal('hide');
+   helper.updateHighscoreList();
+   $('#gameFinished').modal('hide');
    labyrinth.hide();
+   createTBody(labyrinth.mode);
 });
 
 $('#again').click(function(){
-  $('#gameFinished').modal('hide');
-  labyrinth.init();
+   updateHighscoreList();
+   $('#gameFinished').modal('hide');
+   labyrinth.init();
 });
 
 $('#allLabs').click(function(){
@@ -137,8 +133,25 @@ $('#coordinates').click(function(){
     var data = [alpha, beta];
     return data;
   },
+  compare: function(a,b){
+      if (a.score < b.score)
+         return 1;
+      if (a.score > b.score)
+        return -1;
+    return 0;
+  },
   sortHighscore: function(){
-    
+    for(var k in highscore){
+        highscore[k].sort(this.compare);
+    }
+  },
+  updateHighscoreList: function(){
+    var o = {
+      "name": $('#player').val(),
+      "score": player.score
+    };
+    highscore[labyrinth.mode].push(o);
+    this.sortHighscore();
   }
 };
 
