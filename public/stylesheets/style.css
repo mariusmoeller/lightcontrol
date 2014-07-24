@@ -155,26 +155,30 @@ input[type=range] {
     right: 5%;
     background-image: url("/img/wheel.png");
     background-size: cover;
+    border-radius: 15px;
 }
 
 #pongTile {
     bottom: 5%;
     left: 5%;
-    background-image: url("/img/pongV.png");
+    background-image: url("/img/pong.png");
     background-size: cover;
+    border-radius: 15px;
 }
 
 #timerTile {
     bottom: 5%;
     right: 5%;
-    background-image: url("/img/pras.jpg");
+    background-image: url("/img/timer.jpg");
     background-size: cover;
+    border-radius: 15px;
 }
 
 #carTile {
     left: 5%;
     background-image: url("/img/car.png");
     background-size: cover;
+    border-radius: 15px;
 }
 
 .flip-container:hover .flipper, .flip-container.hover .flipper {
