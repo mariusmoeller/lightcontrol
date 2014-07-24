@@ -36,16 +36,19 @@ $(function() {
       user2 = $user2.val();
       socket.emit('pong', 2);
 
+      $('#black').show();
+
       $('#pongLogo').hide();
       $('#playerMode').hide();
       $('.jumbotron').hide();
-      $('.btn-end-game').show();
       updatePoints();
   });
 
   $endButton.click(function(){
     socket.emit('pong', 0);
-    $('.btn-end-game').hide();
+
+    $('#black').hide();
+
     $('#pongLogo').show();
     $('#playerMode').show();
     $('.jumbotron').show();
