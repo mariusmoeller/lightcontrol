@@ -4,19 +4,15 @@ block content
   .container
     .row
       .col-md-9.col-md-offset-1.top-space
+         button.btn-end-game.btn.btn-normal(type="button", style="display:none;") End
         .jumbotron
          h2 Pong
          div.infoText Use your right hand to hit the Ball!
          img#pongLogo(src="/img/pong.png")(style="position:relative;width:60%;left:20%;border-radius:90px")
-         button#update-points.btn.btn-success(type="button", style="display:none;") Test
          div#game-info
         .row#playerMode 
           .col-md-6
             .thumbnail
-             .caption.animated
-              label(for="player1") Name Player 1
-              input.form-control(type='text', placeholder='Name Player 1 ', autofocus='autofocus', id='player1')
-              a(href='#', name="1player").btn-start-game.btn.btn-default.btn-lg.btn-block Start Game
              img(src='img/1player.jpg')
            .col-md-6
               .thumbnail

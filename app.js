@@ -124,10 +124,12 @@ socketio.listen(server).on('connection', function(socket) {
 	});
 
     socket.on('pong', function(options) {
+        console.log("pong: " +options);
         socket.broadcast.emit('pong', options);
     });
 
     socket.on('pongScore', function(player) {
+        console.log("player " + player + " scored");
         socket.broadcast.emit('pongScore', player);
     });
 
