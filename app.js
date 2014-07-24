@@ -100,7 +100,6 @@ var show = Show.createShow();
 // TODO: Put this somewhere else. Maybe turn everything on at start or better
 // save status in config and then send when server starts
 devices[0].turnOn();
-devices[0].setSpot();
 
 // TODO: Change to streaming socketio for improved performance
 // Listen to socketio connections

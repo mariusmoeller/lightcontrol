@@ -15,10 +15,8 @@ Light.prototype.setColor = function(rgb) {
 
 Light.prototype.turnOn = function() {
     var data = {};
- //   data[this.conf.on.channel] = this.conf.on.value;
-  //  data[this.conf.intensity.channel] = 255;
-    data[this.conf.shutter.channel] = this.conf.shutter.value;
-    data[this.conf.intensity.channel] = this.conf.intensity.value;
+    data[this.conf.on.channel] = this.conf.on.value;
+    data[this.conf.intensity.channel] = 255;
     this.artnet.send(data);
 }
 
