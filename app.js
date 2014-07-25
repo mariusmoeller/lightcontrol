@@ -10,6 +10,7 @@ var showRoute = require('./routes/show');
 var pongRoute = require('./routes/pong');
 var carRoute = require('./routes/car');
 var controllerRoute = require('./routes/controller');
+var timerRoute = require('./routes/timer');
 var http = require('http');
 var path = require('path');
 var socketio = require('socket.io');
@@ -62,6 +63,7 @@ app.get('/shows', showRoute.list);
 app.get('/pong', pongRoute.list);
 app.get('/car', carRoute.list);
 app.get('/controller', controllerRoute.list);
+app.get('/timer', timerRoute.list);
 
 app.get('/conf', function(req, res) {res.render('conf')});
 app.get('/draw', function(req, res) {res.render('draw')});
@@ -198,5 +200,26 @@ socketio.listen(server).on('connection', function(socket) {
     socket.on('direct', function(data) {
         console.log(data);
         artnetClient.send(data);
+    });
+
+    socket.on("timer",function(colorArray){
+        var counter = 0;
+
+        var i = setInterval(function() {
+             var hexColor = colorArray[counter];
+
+             var num = parseInt(hexColor.substring(1), 16);
+
+            devices[0].setColor([num >> 16, num >> 8 & 255, num & 255])
+
+            console.log(num);
+
+            counter++;
+
+            if(counter == colorArray.length)
+                clearInterval(i);
+
+        }, 1000);
+
     });
 });
