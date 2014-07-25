@@ -183,9 +183,10 @@ var labyrinth = {
     this.yMin = Math.round((-1) * this.screenWidth / 2);
 
     //start line
-    var startLine = window[labyrinth.mode + "StartLine"];
-    this.currentY = this.yMin + startLine.xStart + Math.round((startLine.xEnd - startLine.xStart / 2));
-    this.currentZ = this.zMax - startLine.y;
+    var start = window[labyrinth.mode + "StartLine"];
+    this.currentY = this.yMin + Math.round((start.xStart + start.xEnd) / 2);
+    this.currentZ = this.zMax - start.y;
+    console.log(this.currentY + ", " + this.currentZ);
 
     this.sendPosition();
     helper.socket.emit('color', '#00ff00', 0);
@@ -247,8 +248,8 @@ var labyrinth = {
   },
 
   checkObstacles: function(y, z){
-    var xInArray = Math.round(this.yMax + y);
-    var yInArray = Math.round(this.zMax - z);
+    var xInArray = Math.round(this.yMin + y);
+    var yInArray = Math.round(this.zMin + z);
     var obstacles = window[labyrinth.mode + "Obstacles"];
     if(obstacles[yInArray]){
       if(obstacles[yInArray][xInArray]){

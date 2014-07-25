@@ -26,5 +26,12 @@ var highscore = {
 		{name: "Anna", score: 209},
 		{name: "Bernie", score: 199},
 		{name: "Marius", score: 153}
+	],
+	"simple": [
+		{name: "Michel", score: 386},
+		{name: "Anro", score: 312},
+		{name: "Anna", score: 209},
+		{name: "Bernie", score: 199},
+		{name: "Marius", score: 153}
 	]
 };
