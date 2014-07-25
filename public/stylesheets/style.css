@@ -97,6 +97,10 @@ input[type=range] {
     width: 30%;
 }
 
+.easyLab > #score {
+    left: 11em;
+}
+
 #time {
     position: fixed;
 }
@@ -111,12 +115,12 @@ input[type=range] {
 
 .extremeLab > #score {
     left: 15em;
+    top: 0px;
 }
 
 .hardLab > #time {
     right: 5px;
     bottom: 5px;
-    width: 12%;
 }
 
 .hardLab > #score {
@@ -126,6 +130,7 @@ input[type=range] {
 
 .mediumLab {
     left: 7em;
+    width: 50%;
 }
 
 .mediumLab > #time {
