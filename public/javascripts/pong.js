@@ -23,12 +23,13 @@ $(function() {
       } else if (scoringUser == 2) {
         user2Points ++;
       }
-      $gameInfo.empty();
-      $gameInfo.append('<p class="user user1">'+ user1 + '<span class"points">: ' + user1Points +'</span></p>');
       meSpeak.speak(user1 + '–' + user1Points + "-" + "Points",{volume : 0.9}, function () {
-            $gameInfo.append('<p class="user user2">'+ user2 + '<span class"points">: ' + user2Points +'</span></p>');
             meSpeak.speak(user2 + '–' + user2Points + "-" + "Points");
       });
+
+      if(user1Points == 10 || user2Points == 10){
+        endGame();
+      }
   }
 
   $startButton.click(function(e) {
@@ -45,14 +46,23 @@ $(function() {
   });
 
   $endButton.click(function(){
-    socket.emit('pong', 0);
+    endGame();
+  });
+
+  function endGame() {
+     socket.emit('pong', 0);
 
     $('#black').hide();
 
     $('#pongLogo').show();
     $('#playerMode').show();
     $('.jumbotron').show();
-  });
+
+    $user1.val("");
+    $user2.val("");
+    user1Points = 0;
+    user2Points = 0;
+  }
 
   //test function
   $('#update-points').click(function () {
