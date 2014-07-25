@@ -67,19 +67,19 @@ block content
                       form(role='form')
                       .form-group
                         label(for='distance') Distance
-                        input#distance.form-control(type='text', placeholder='Enter Distance in cm', value='210')
+                        input#distance.form-control(type='text', placeholder='Enter Distance in cm', value='235')
                       .form-group
                         label(for='washHeight') Wash Height
-                        input#washHeight.form-control(type='text', placeholder='Enter  Height of Wash in cm', value='52')
+                        input#washHeight.form-control(type='text', placeholder='Enter  Height of Wash in cm', value='100')
                       .form-group
                         label(for='projectorHeight') Projector Height
-                        input#projectorHeight.form-control(type='text', placeholder='Enter Height of Projector in cm', value ='114')
+                        input#projectorHeight.form-control(type='text', placeholder='Enter Height of Projector in cm', value ='110')
                       .form-group
                         label(for='screenWidth') Screen Width
-                        input#screenWidth.form-control(type='text', placeholder='Enter Width of Screen in cm', value='210')
+                        input#screenWidth.form-control(type='text', placeholder='Enter Width of Screen in cm', value='190')
                       .form-group
                         label(for='screenHeight') Screen Height
-                        input#screenHeight.form-control(type='text', placeholder='Enter Height of Screen in cm', value='122')
+                        input#screenHeight.form-control(type='text', placeholder='Enter Height of Screen in cm', value='118')
             .col-md-3#btns
               button.btn.btn-primary.btn-lg.btn-block#startGame Start Game
               button.btn.btn-default.btn-lg.btn-block#allLabs Show All Labs
@@ -119,7 +119,7 @@ block content
           span#totalScore 0
           |  points!
           br
-          p#highscore(style="color: red; font-weight: bold; display: none;") Highscore!!!
+          p#highscoreAlert(style="color: red; font-weight: bold; display: none;") Highscore!!!
         .modal-footer
           input.form-control(type='text', placeholder='Enter your Name', autofocus='autofocus', id='player')
           button#again.btn.btn-default(type='button', data-dismiss='modal') Try Again

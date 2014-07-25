@@ -38,6 +38,7 @@ $('img').click(function(){
 });
 
 function createTBody(mode){
+  helper.sortHighscore();
   $('#highscoreTable').children('tbody').remove();
   var tbody = $('<tbody/>');
   var scores = highscore[mode];
@@ -73,22 +74,16 @@ $('#backButton').click(function(){
 });
 
 $('#back').click(function(){
-  debugger;
-  if($('#highscore').css('display') == "block"){
-    var o = {
-      "name": $('#player').val(),
-      "score": game.pointHighScore
-    };
-    highscore[labyrinth.mode].add(o);
-    helper.sortHighscore();
-  }
-  $('#gameFinished').modal('hide');
+   helper.updateHighscoreList();
+   $('#gameFinished').modal('hide');
    labyrinth.hide();
+   createTBody(labyrinth.mode);
 });
 
 $('#again').click(function(){
-  $('#gameFinished').modal('hide');
-  labyrinth.init();
+   updateHighscoreList();
+   $('#gameFinished').modal('hide');
+   labyrinth.init();
 });
 
 $('#allLabs').click(function(){
@@ -138,8 +133,25 @@ $('#coordinates').click(function(){
     var data = [alpha, beta];
     return data;
   },
-  orderHighscore: function(){
-    
+  compare: function(a,b){
+      if (a.score < b.score)
+         return 1;
+      if (a.score > b.score)
+        return -1;
+    return 0;
+  },
+  sortHighscore: function(){
+    for(var k in highscore){
+        highscore[k].sort(this.compare);
+    }
+  },
+  updateHighscoreList: function(){
+    var o = {
+      "name": $('#player').val(),
+      "score": player.score
+    };
+    highscore[labyrinth.mode].push(o);
+    this.sortHighscore();
   }
 };
 
@@ -294,11 +306,11 @@ var game = {
   turnFinished : function() {
     var timeForRound = this.turnTime;
     player.turnsFinished++;
-    if(player.turnsFinished < game.turnsToFinish){
-      this.showStatus(timeForRound);
-    }
     if(player.fastestTurn > timeForRound){
       player.fastestTurn = timeForRound;
+    }
+    if(player.turnsFinished < game.turnsToFinish){
+      this.showStatus(timeForRound);
     }
     if(player.turnsFinished == game.turnsToFinish){
       this.gameFinished(true);
@@ -312,11 +324,10 @@ var game = {
       $('#fastestTurn').text(player.fastestTurn);
       $('#totalScore').text(player.score);
       $('#gameFinished').modal();
-      debugger;
       if(highscore[labyrinth.mode][0].score < player.score){
-        $('#highscore').show();
+        $('#highscoreAlert').show();
       }else{
-        $('#highscore').hide();
+        $('#highscoreAlert').hide();
       }
       helper.socket.emit('color', '#ffffff', 0); //white 
     }
@@ -328,7 +339,7 @@ var player = {
   score : 0,
   moves : 0,
   obstaclesCrashed : 0,
-  fastestTurn: 0,
+  fastestTurn: 99999999999,
   reset : function() {
     this.turnsFinished = 0;
     this.score = 0;

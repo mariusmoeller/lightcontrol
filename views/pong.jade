@@ -4,7 +4,6 @@ block content
   .container
     .row
       .col-md-9.col-md-offset-1.top-space
-         button.btn-end-game.btn.btn-normal(type="button", style="display:none;") End
         .jumbotron
          h2 Pong
          div.infoText Use your right hand to hit the Ball!
@@ -23,6 +22,9 @@ block content
                  input.form-control(type='text', placeholder='Name Player 2 ', autofocus='autofocus', id='player2')
                  a(href='#', name="2player").btn-start-game.btn.btn-default.btn-lg.btn-block Start Game
                img(src='img/2player.jpg')
+  #black(style="display:none;")
+   img.bg(src="/img/black.jpg")
+   button.btn-end-game.btn.btn-warning(type="button") End Game
  append javascript
     script(src='/lib/pong/mespeak.js')
     script(src='/javascripts/pong.js')
