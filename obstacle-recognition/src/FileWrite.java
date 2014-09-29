@@ -6,8 +6,7 @@ public class FileWrite {
 	private BufferedWriter out;
 
 	public FileWrite() throws IOException {
-		// fstream = new FileWriter("/Users/anna/lightcontrol/public/javascripts/obstacles.js");
-		fstream = new FileWriter("C:/Users/anna/Documents/Uni/5. Semester/Projekt/lightcontrol/public/javascripts/obstacles.js");
+		fstream = new FileWriter("../../public/javascripts/obstacles.js");
 		out = new BufferedWriter(fstream);
 
 	}
