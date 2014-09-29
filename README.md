@@ -7,3 +7,5 @@ Usage: node app.js [OPTION]
 
 -a IP-Address of artnet-server
 -p Port of artnet-server
+
+Project wiki can be found [here](http://gitlab.cm.htw-berlin.de/studentenprojekte/bp-interaktives-licht/wikis/home)
